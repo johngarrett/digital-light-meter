@@ -100,13 +100,11 @@ void show_settings() {
   display.setCursor(0,0);
 
   selected_s_mode == S_MODE_ISO ? display.setTextColor(SSD1306_BLACK, SSD1306_WHITE) : display.setTextColor(SSD1306_WHITE);
-  display.print("ISO  ");
-  display.println(ISO_TABLE[iso_indx]);
+  print_left_1x(String("ISO  ") + String(ISO_TABLE[iso_indx]));
 
   selected_s_mode == S_MODE_FL ? display.setTextColor(SSD1306_BLACK, SSD1306_WHITE) : display.setTextColor(SSD1306_WHITE);
-  display.print("FOCAL ");
-  display.print(FL_TABLE[fl_indx]);
-  display.println("mm");
+  print_right_1x(String("F-len ") + String(FL_TABLE[fl_indx]) + String("mm"));
+  display.println();
 
   selected_s_mode == S_MODE_CVAL ? display.setTextColor(SSD1306_BLACK, SSD1306_WHITE) : display.setTextColor(SSD1306_WHITE);
   display.print("C-Val ");

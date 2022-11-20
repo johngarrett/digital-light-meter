@@ -262,7 +262,8 @@ void display_info() {
   display.setCursor(0,0);
 
   selected_mode == MODE_SETTINGS ? display.setTextColor(SSD1306_BLACK, SSD1306_WHITE) : display.setTextColor(SSD1306_WHITE);
-  display.println("SETTINGS");
+  print_full_1x("SETTINGS");
+  display.println();
 
   selected_mode == MODE_SS ? display.setTextColor(SSD1306_BLACK, SSD1306_WHITE) : display.setTextColor(SSD1306_WHITE);
   print_left_1x(String("1/") + String(int(SS_TABLE[ss_indx])) + String((selected_prio == SS_PRIO ? " P" : "")));

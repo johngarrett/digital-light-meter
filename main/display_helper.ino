@@ -23,6 +23,14 @@ void print_right_1x(String str) {
   display.print(str);
 }
 
+// print full width
+void print_full_1x(String str) {
+  display.print(str);
+  for (int i = 21; i > str.length(); --i) {
+    display.print(' ');
+  }
+}
+
 // show editing screen with `title` to edit `value`
 void render_edit_screen(String title, String value) {
   display.clearDisplay();

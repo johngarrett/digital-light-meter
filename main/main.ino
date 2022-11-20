@@ -286,26 +286,12 @@ void display_editing_screen() {
     return;
   }
 
-  display.clearDisplay();
-  display.setTextSize(2); // 2x font for readability
-  display.setCursor(0,0);
-
-  display.setTextColor(SSD1306_WHITE);
-
-
-  if (selected_mode == MODE_SS_EDIT) {
-    display.println("SS");
-    display.setTextColor(SSD1306_BLACK, SSD1306_WHITE);
-    display.print("1/");
-    display.println(int(SS_TABLE[ss_indx]));
+  switch (selected_mode) {
+    case MODE_SS_EDIT:
+      render_edit_screen("SS", String("1/") + String(SS_TABLE[ss_indx]));
+      break;
+    case MODE_APT_EDIT:
+      render_edit_screen("APETURE", String("f ") + String(APT_TABLE[apt_indx]));
+      break;
   }
-
-  if (selected_mode == MODE_APT_EDIT) {
-    display.println("APETURE");
-    display.setTextColor(SSD1306_BLACK, SSD1306_WHITE);
-    display.print("f ");
-    display.println(APT_TABLE[apt_indx]);
-  }
-
-  display.display();
 }

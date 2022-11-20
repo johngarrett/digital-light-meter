@@ -119,30 +119,15 @@ void show_settings() {
 }
 
 void display_settings_edit() {
-  display.clearDisplay();
-  display.setTextSize(2); // 2x font for readability
-  display.setCursor(0,0);
-
-  if (selected_s_mode == S_MODE_ISO_EDIT) {
-    display.setTextColor(SSD1306_WHITE);
-    display.println("ISO");
-    display.setTextColor(SSD1306_BLACK, SSD1306_WHITE);
-    display.println(ISO_TABLE[iso_indx]);
+  switch (selected_s_mode) {
+    case S_MODE_ISO_EDIT:
+      render_edit_screen("ISO", String(ISO_TABLE[iso_indx]));
+      break;
+    case S_MODE_FL_EDIT:
+      render_edit_screen("F-length", String(FL_TABLE[fl_indx]));
+      break;
+    case S_MODE_CVAL_EDIT:
+      render_edit_screen("C-Val", String(C_TABLE[c_indx]));
+      break;
   }
-
-  if (selected_s_mode == S_MODE_FL_EDIT) {
-    display.setTextColor(SSD1306_WHITE);
-    display.println("F-Length");
-    display.setTextColor(SSD1306_BLACK, SSD1306_WHITE);
-    display.println(FL_TABLE[fl_indx]);
-  }
-
-  if (selected_s_mode == S_MODE_CVAL_EDIT) {
-    display.setTextColor(SSD1306_WHITE);
-    display.println("C-Val");
-    display.setTextColor(SSD1306_BLACK, SSD1306_WHITE);
-    display.println(C_TABLE[c_indx]);
-  }
-
-  display.display();
 }

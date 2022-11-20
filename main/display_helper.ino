@@ -22,3 +22,18 @@ void print_right_1x(String str) {
   }
   display.print(str);
 }
+
+// show editing screen with `title` to edit `value`
+void render_edit_screen(String title, String value) {
+  display.clearDisplay();
+  display.setTextSize(2); // 2x font for readability
+  display.setCursor(0,0);
+
+  display.setTextColor(SSD1306_WHITE);
+
+  display.println(title);
+  display.setTextColor(SSD1306_BLACK, SSD1306_WHITE);
+  display.println(value);
+
+  display.display();
+}

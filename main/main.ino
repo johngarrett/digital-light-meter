@@ -23,11 +23,13 @@ const double APT_TABLE[]  = {1.0, 1.4, 1.8, 2.0, 2.8, 3.5, 4.0, 4.5, 5.6, 6.3, 8
 const int ISO_TABLE[]     = {6, 12, 25, 50, 100, 160, 200, 400, 800, 1600, 3200, 6400};
 const double SS_TABLE[]   = {-1, 2, 5, 10, 25, 50, 100, 250, 500, 1000};
 const int C_TABLE[]       = { 250, 330 };
+const int FL_TABLE[]      = { 28, 50 }; // focal length
 
 const int apt_tbl_sz = sizeof(APT_TABLE) / sizeof(APT_TABLE[0]);
 const int iso_tbl_sz = sizeof(ISO_TABLE) / sizeof(ISO_TABLE[0]);
 const int ss_tbl_sz = sizeof(SS_TABLE) / sizeof(SS_TABLE[0]);
 const int c_tbl_sz = sizeof(C_TABLE) / sizeof(C_TABLE[0]);
+const int fl_tbl_sz = sizeof(FL_TABLE) / sizeof(FL_TABLE[0]);
 
 enum mode { MODE_SS, MODE_SS_EDIT, MODE_APT, MODE_APT_EDIT, MODE_SETTINGS, MODE_SETTINGS_EDIT };
 enum priority { APT_PRIO, SS_PRIO };
@@ -38,10 +40,7 @@ BH1750 lightMeter;
 
 float lux;
 double ev_delta = 0;
-int apt_indx = 0;
-int iso_indx = 0;
-int ss_indx = 0;
-int c_indx = 0;
+int apt_indx, iso_indx, ss_indx, c_indx, fl_indx = 0;
 int sel_state = 0;
 int pot_val = 0;
 
@@ -74,6 +73,7 @@ void setup() {
   int default_iso = 200;
   double default_ss = 100;
   int default_c = 330;
+  int default_fl = 50;
 
 
   // set indicies for each value
@@ -101,6 +101,13 @@ void setup() {
   for (int i = 0; i < c_tbl_sz; ++i) {
     if (C_TABLE[i] == default_c) {
       c_indx = i;
+      break;
+    }
+  }
+
+  for (int i = 0; i < fl_tbl_sz; ++i) {
+    if (FL_TABLE[i] == default_fl) {
+      fl_indx = i;
       break;
     }
   }

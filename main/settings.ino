@@ -1,9 +1,12 @@
-
-enum settings_mode { S_MODE_ISO, S_MODE_ISO_EDIT, S_MODE_BACK };
+enum settings_mode { S_MODE_ISO, S_MODE_ISO_EDIT, S_MODE_CVAL, S_MODE_CVAL_EDIT, S_MODE_BACK };
 settings_mode selected_s_mode = S_MODE_ISO;
 
 boolean on_main_settings_screen() {
-  return selected_s_mode == S_MODE_ISO || selected_s_mode == S_MODE_BACK;
+  return selected_s_mode == S_MODE_ISO || selected_s_mode == S_MODE_CVAL || selected_s_mode == S_MODE_BACK;
+}
+
+boolean on_edit_settings_screen() {
+  return selected_s_mode == S_MODE_ISO_EDIT || selected_s_mode == S_MODE_CVAL_EDIT;
 }
 
 void handle_settings_input() {
@@ -15,6 +18,12 @@ void handle_settings_input() {
       case S_MODE_ISO_EDIT:
         selected_s_mode = S_MODE_ISO;
         break;
+      case S_MODE_CVAL:
+        selected_s_mode = S_MODE_CVAL_EDIT;
+        break;
+      case S_MODE_CVAL_EDIT:
+        selected_s_mode = S_MODE_CVAL;
+        break;
       case S_MODE_BACK:
         selected_s_mode = S_MODE_ISO; // reset
         selected_mode = MODE_SETTINGS;
@@ -25,7 +34,7 @@ void handle_settings_input() {
 
   // navigate main screen
   if (on_main_settings_screen()) {
-    switch (map(pot_val, 0, 1023, 1, 6)) {
+    switch (map(pot_val, 0, 1023, 1, 9)) {
       case 1:
       case 2:
       case 3:
@@ -34,6 +43,11 @@ void handle_settings_input() {
       case 4:
       case 5:
       case 6:
+        selected_s_mode = S_MODE_CVAL;
+        break;
+      case 7:
+      case 8:
+      case 9:
         selected_s_mode = S_MODE_BACK;
         break;
     }
@@ -47,10 +61,17 @@ void handle_settings_input() {
     }
   }
 
+  if (selected_s_mode == S_MODE_CVAL_EDIT) {
+    c_indx = map(pot_val, 0, 1023, 0, c_tbl_sz);
+    // for some reason, it glitches out at high values; this helps
+    if (c_indx == c_tbl_sz) {
+      c_indx--;
+    }
+  }
 }
 
 void show_settings() {
-  if (selected_s_mode == S_MODE_ISO_EDIT) {
+  if (on_edit_settings_screen()) {
     display_settings_edit();
     return;
   }
@@ -66,8 +87,9 @@ void show_settings() {
   display.setTextColor(SSD1306_WHITE);
   display.println("FOCAL 28mm");
 
-  display.setTextColor(SSD1306_WHITE);
-  display.println("C-Val 330");
+  selected_s_mode == S_MODE_CVAL ? display.setTextColor(SSD1306_BLACK, SSD1306_WHITE) : display.setTextColor(SSD1306_WHITE);
+  display.print("C-Val ");
+  display.println(C_TABLE[c_indx]);
 
   selected_s_mode == S_MODE_BACK ? display.setTextColor(SSD1306_BLACK, SSD1306_WHITE) : display.setTextColor(SSD1306_WHITE);
   display.println("BACK");
@@ -76,16 +98,23 @@ void show_settings() {
 }
 
 void display_settings_edit() {
-  if (selected_s_mode == S_MODE_ISO_EDIT) {
-    display.clearDisplay();
-    display.setTextSize(2); // 2x font for readability
-    display.setCursor(0,0);
+  display.clearDisplay();
+  display.setTextSize(2); // 2x font for readability
+  display.setCursor(0,0);
 
+  if (selected_s_mode == S_MODE_ISO_EDIT) {
     display.setTextColor(SSD1306_WHITE);
     display.println("ISO");
     display.setTextColor(SSD1306_BLACK, SSD1306_WHITE);
     display.println(ISO_TABLE[iso_indx]);
-    display.display();
-    return;
   }
+
+  if (selected_s_mode == S_MODE_CVAL_EDIT) {
+    display.setTextColor(SSD1306_WHITE);
+    display.println("C-Val");
+    display.setTextColor(SSD1306_BLACK, SSD1306_WHITE);
+    display.println(C_TABLE[c_indx]);
+  }
+
+  display.display();
 }

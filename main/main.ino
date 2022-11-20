@@ -21,11 +21,13 @@
 
 const double APT_TABLE[]  = {1.0, 1.4, 1.8, 2.0, 2.8, 3.5, 4.0, 4.5, 5.6, 6.3, 8.0, 11.0, 12.7, 16.0, 22.0, 32.0};
 const int ISO_TABLE[]     = {6, 12, 25, 50, 100, 160, 200, 400, 800, 1600, 3200, 6400};
-double SS_TABLE[]         = {-1, 2, 5, 10, 25, 50, 100, 250, 500, 1000};
+const double SS_TABLE[]   = {-1, 2, 5, 10, 25, 50, 100, 250, 500, 1000};
+const int C_TABLE[]       = { 250, 330 };
 
 const int apt_tbl_sz = sizeof(APT_TABLE) / sizeof(APT_TABLE[0]);
 const int iso_tbl_sz = sizeof(ISO_TABLE) / sizeof(ISO_TABLE[0]);
 const int ss_tbl_sz = sizeof(SS_TABLE) / sizeof(SS_TABLE[0]);
+const int c_tbl_sz = sizeof(C_TABLE) / sizeof(C_TABLE[0]);
 
 enum mode { MODE_SS, MODE_SS_EDIT, MODE_APT, MODE_APT_EDIT, MODE_SETTINGS, MODE_SETTINGS_EDIT };
 enum priority { APT_PRIO, SS_PRIO };
@@ -39,6 +41,7 @@ double ev_delta = 0;
 int apt_indx = 0;
 int iso_indx = 0;
 int ss_indx = 0;
+int c_indx = 0;
 int sel_state = 0;
 int pot_val = 0;
 
@@ -70,6 +73,7 @@ void setup() {
   double default_apt = 2.8;
   int default_iso = 200;
   double default_ss = 100;
+  int default_c = 330;
 
 
   // set indicies for each value
@@ -90,6 +94,13 @@ void setup() {
   for (int i = 0; i < ss_tbl_sz; ++i) {
     if (SS_TABLE[i] == default_ss) {
       ss_indx = i;
+      break;
+    }
+  }
+
+  for (int i = 0; i < c_tbl_sz; ++i) {
+    if (C_TABLE[i] == default_c) {
+      c_indx = i;
       break;
     }
   }
@@ -185,7 +196,7 @@ void calculate_stats() {
   if (selected_prio == APT_PRIO) {
     // calculate SS 
     double apt = APT_TABLE[apt_indx];
-    double ss = 1 / ((INCIDENT_CALIBRATION * pow(apt, 2)) / (lux * ISO_TABLE[iso_indx]));
+    double ss = 1 / ((C_TABLE[c_indx] * pow(apt, 2)) / (lux * ISO_TABLE[iso_indx]));
     Serial.print("Apt: ");
     Serial.println(apt);
     Serial.print("calc speed: ");
@@ -207,7 +218,7 @@ void calculate_stats() {
   } else {
     // calculate APT 
     double ss = 1 / SS_TABLE[ss_indx];
-    double apt = sqrt(((lux * ISO_TABLE[iso_indx]) / INCIDENT_CALIBRATION) * ss);
+    double apt = sqrt(((lux * ISO_TABLE[iso_indx]) / C_TABLE[c_indx]) * ss);
     Serial.print("Calc apt: ");
     Serial.println(apt);
 
@@ -227,7 +238,7 @@ void calculate_stats() {
   }
 
   // calculate ev detla
-  double actual_ev = log2((lux * ISO_TABLE[iso_indx]) / INCIDENT_CALIBRATION);
+  double actual_ev = log2((lux * ISO_TABLE[iso_indx]) / C_TABLE[c_indx]);
   double calc_ev = log2(pow(APT_TABLE[apt_indx], 2.0) / (1.0 / SS_TABLE[ss_indx]));
 
   ev_delta = actual_ev - calc_ev;

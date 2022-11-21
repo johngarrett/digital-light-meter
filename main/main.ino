@@ -120,6 +120,14 @@ void read_inputs() {
   pot_val = analogRead(POT_PIN);
 }
 
+boolean on_main_screen() {
+  return selected_mode == MODE_SETTINGS || selected_mode == MODE_HISTORY || selected_mode == MODE_SS || selected_mode == MODE_APT;
+}
+
+boolean on_edit_screen() {
+  return selected_mode == MODE_SETTINGS_EDIT || selected_mode == MODE_HISTORY_EDIT || selected_mode == MODE_APT_EDIT || selected_mode == MODE_SS_EDIT;
+}
+
 void handle_inputs() {
   // pass control over to the settings file
   if (selected_mode == MODE_SETTINGS_EDIT) {
@@ -158,7 +166,7 @@ void handle_inputs() {
   }
 
   // the user wants to set a value to be automatically decided
-  if (selected_mode == MODE_SETTINGS || selected_mode == MODE_HISTORY || selected_mode == MODE_SS || selected_mode == MODE_APT) {
+  if (on_main_screen()) {
     // map pot val to { SET, HIST, SS, APT } (3x for better error handling)
     switch (map(pot_val, 0, 1023, 1, 12)) {
       case 1:
@@ -248,7 +256,7 @@ void calculate_stats() {
 }
 
 void display_info() {
-  if (selected_mode == MODE_SETTINGS_EDIT || selected_mode == MODE_HISTORY_EDIT || selected_mode == MODE_APT_EDIT || selected_mode == MODE_SS_EDIT) {
+  if (on_edit_screen()) {
     display_editing_screen();
     return;
   }
@@ -300,19 +308,15 @@ void display_info() {
   display.display();
 }
 
-// when the user is editing a value
+// when the user is editing a menu item
 void display_editing_screen() {
-  if (selected_mode == MODE_SETTINGS_EDIT) {
-    show_settings();
-    return;
-  }
-
-  if (selected_mode == MODE_HISTORY_EDIT) {
-    show_history();
-    return;
-  }
-
   switch (selected_mode) {
+    case MODE_SETTINGS_EDIT:
+      show_settings();
+      break;
+    case MODE_HISTORY_EDIT:
+      show_history();
+      break;
     case MODE_SS_EDIT:
       render_edit_screen("SS", String("1/") + String(SS_TABLE[ss_indx]));
       break;

@@ -30,6 +30,36 @@ void print_full_1x(String str) {
     display.print(' ');
   }
 }
+void print_center_1x(String str) {
+  int offset = str.length() % 2 == 0 ? 0 : 1; // one side needs to be longer
+  for (int i = 0; i < 20 / 2 - (str.length() / 2) - offset; ++i) {
+    display.print(' ');
+  }
+  display.print(str);
+  for (int i = 0; i < 20 / 2 - (str.length() / 2) + 1; ++i) {
+    display.print(' ');
+  }
+}
+
+/**
+  screen width == 10 chars (in 2x mode)
+  left align: 5 chars on left
+  right align: 5 chars on right
+*/
+
+void print_center_2x(String str) {
+  display.setTextSize(2);
+  int y = display.getCursorY();
+  int offset = str.length() % 2 == 0 ? 0 : 1; // one side needs to be longer
+  for (int i = 0; i < 10 / 2 - (str.length() / 2) - offset; ++i) {
+    display.print(' ');
+  }
+  display.print(str);
+  for (int i = 0; i < 10 / 2 - (str.length() / 2); ++i) {
+    display.print(' ');
+  }
+  display.setTextSize(1);
+}
 
 // show editing screen with `title` to edit `value`
 void render_edit_screen(String title, String value) {

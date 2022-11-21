@@ -13,12 +13,6 @@
 #define SEL_PIN  5
 #define POT_PIN   A5
 
-// Calibration constant (C) for incident light meters.
-// see https://en.wikipedia.org/wiki/Light_meter#Calibration_constants
-// TODO: allow the user to set this
-#define INCIDENT_CALIBRATION    330
-
-
 const double APT_TABLE[]  = {1.0, 1.4, 1.8, 2.0, 2.8, 3.5, 4.0, 4.5, 5.6, 6.3, 8.0, 11.0, 12.7, 16.0, 22.0, 32.0};
 const int ISO_TABLE[]     = {6, 12, 25, 50, 100, 160, 200, 400, 800, 1600, 3200, 6400};
 const double SS_TABLE[]   = {-1, 2, 5, 10, 25, 50, 100, 250, 500, 1000};
@@ -167,12 +161,13 @@ void handle_inputs() {
       case 4:
       case 5:
       case 6:
-        selected_mode = MODE_SS;
+        // ordering changes based on priority
+        selected_mode = (selected_prio == APT_PRIO) ? MODE_SS : MODE_APT;
         break;
       case 7:
       case 8:
       case 9:
-        selected_mode = MODE_APT;
+        selected_mode = (selected_prio == SS_PRIO) ? MODE_SS : MODE_APT;
         break;
     }
   }
@@ -262,20 +257,44 @@ void display_info() {
   display.setCursor(0,0);
 
   selected_mode == MODE_SETTINGS ? display.setTextColor(SSD1306_BLACK, SSD1306_WHITE) : display.setTextColor(SSD1306_WHITE);
-  print_full_1x("SETTINGS");
+  print_left_1x("SETTINGS");
+  selected_mode == -1 ? display.setTextColor(SSD1306_BLACK, SSD1306_WHITE) : display.setTextColor(SSD1306_WHITE);
+  print_right_1x("HISTORY");
   display.println();
 
-  selected_mode == MODE_SS ? display.setTextColor(SSD1306_BLACK, SSD1306_WHITE) : display.setTextColor(SSD1306_WHITE);
-  print_left_1x(String("1/") + String(int(SS_TABLE[ss_indx])) + String((selected_prio == SS_PRIO ? " P" : "")));
+  if (selected_prio == SS_PRIO) {
+    /*
+        |    APT    |
+        |    APT    |
+        | ss     ev |
+    */
+    selected_mode == MODE_APT ? display.setTextColor(SSD1306_BLACK, SSD1306_WHITE) : display.setTextColor(SSD1306_WHITE);
+    print_center_2x(String("f ") + String(APT_TABLE[apt_indx]) + String((selected_prio == APT_PRIO ? " P" : "")));
+    display.println("\n"); // two new lines
 
-  selected_mode == MODE_APT ? display.setTextColor(SSD1306_BLACK, SSD1306_WHITE) : display.setTextColor(SSD1306_WHITE);
-  print_right_1x(String("f ") + String(APT_TABLE[apt_indx]) + String((selected_prio == APT_PRIO ? " P" : "")));
+    selected_mode == MODE_SS ? display.setTextColor(SSD1306_BLACK, SSD1306_WHITE) : display.setTextColor(SSD1306_WHITE);
+    print_left_1x(String("1/") + String(int(SS_TABLE[ss_indx])) + String((selected_prio == SS_PRIO ? " P" : "")));
+
+    display.setTextColor(SSD1306_WHITE);
+    print_right_1x(String(ev_delta));
+  } else {
+    /*
+        |    SS     |
+        |    SS     |
+        | apt    ev |
+    */
+    selected_mode == MODE_SS ? display.setTextColor(SSD1306_BLACK, SSD1306_WHITE) : display.setTextColor(SSD1306_WHITE);
+    print_center_2x(String("1/") + String(int(SS_TABLE[ss_indx])) + String((selected_prio == SS_PRIO ? " P" : "")));
+    display.println("\n"); // two new lines
+
+    selected_mode == MODE_APT ? display.setTextColor(SSD1306_BLACK, SSD1306_WHITE) : display.setTextColor(SSD1306_WHITE);
+    print_left_1x(String("f ") + String(APT_TABLE[apt_indx]) + String((selected_prio == APT_PRIO ? " P" : "")));
+
+    display.setTextColor(SSD1306_WHITE);
+    print_right_1x(String(ev_delta));
+  }
+
   display.println();
-
-  display.setTextColor(SSD1306_WHITE);
-  display.print("EV delta: ");
-  display.println(ev_delta);
-
   display.display();
 }
 

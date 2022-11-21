@@ -44,22 +44,22 @@ void handle_settings_input() {
       case 1:
       case 2:
       case 3:
-        selected_s_mode = S_MODE_ISO;
+        selected_s_mode = S_MODE_BACK;
         break;
       case 4:
       case 5:
       case 6:
-        selected_s_mode = S_MODE_FL;
+        selected_s_mode = S_MODE_ISO;
         break;
       case 7:
       case 8:
       case 9:
-        selected_s_mode = S_MODE_CVAL;
+        selected_s_mode = S_MODE_FL;
         break;
       case 10:
       case 11:
       case 12:
-        selected_s_mode = S_MODE_BACK;
+        selected_s_mode = S_MODE_CVAL;
         break;
     }
   }
@@ -99,6 +99,10 @@ void show_settings() {
   display.setTextSize(1);
   display.setCursor(0,0);
 
+  selected_s_mode == S_MODE_BACK ? display.setTextColor(SSD1306_BLACK, SSD1306_WHITE) : display.setTextColor(SSD1306_WHITE);
+  print_center_1x("BACK");
+  display.println();
+
   selected_s_mode == S_MODE_ISO ? display.setTextColor(SSD1306_BLACK, SSD1306_WHITE) : display.setTextColor(SSD1306_WHITE);
   print_left_1x(String("ISO  ") + String(ISO_TABLE[iso_indx]));
 
@@ -110,8 +114,6 @@ void show_settings() {
   display.print("C-Val ");
   display.println(C_TABLE[c_indx]);
 
-  selected_s_mode == S_MODE_BACK ? display.setTextColor(SSD1306_BLACK, SSD1306_WHITE) : display.setTextColor(SSD1306_WHITE);
-  display.println("BACK");
 
   display.display();
 }

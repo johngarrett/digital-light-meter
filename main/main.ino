@@ -25,7 +25,7 @@ const int ss_tbl_sz = sizeof(SS_TABLE) / sizeof(SS_TABLE[0]);
 const int c_tbl_sz = sizeof(C_TABLE) / sizeof(C_TABLE[0]);
 const int fl_tbl_sz = sizeof(FL_TABLE) / sizeof(FL_TABLE[0]);
 
-enum mode { MODE_SS, MODE_SS_EDIT, MODE_APT, MODE_APT_EDIT, MODE_SETTINGS, MODE_SETTINGS_EDIT };
+enum mode { MODE_SS, MODE_SS_EDIT, MODE_APT, MODE_APT_EDIT, MODE_SETTINGS, MODE_SETTINGS_EDIT, MODE_HISTORY, MODE_HISTORY_EDIT };
 enum priority { APT_PRIO, SS_PRIO };
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
@@ -127,6 +127,11 @@ void handle_inputs() {
     return;
   }
 
+  if (selected_mode == MODE_HISTORY_EDIT) {
+    handle_history_input();
+    return;
+  }
+
   // switching between parent and child view
   if (sel_state == 1) {
     switch (selected_mode) {
@@ -145,14 +150,17 @@ void handle_inputs() {
       case MODE_SETTINGS:
         selected_mode = MODE_SETTINGS_EDIT;
         break;
+      case MODE_HISTORY:
+        selected_mode = MODE_HISTORY_EDIT;
+        break;
     }
     delay(175); // to prevent jittering
   }
 
   // the user wants to set a value to be automatically decided
-  if (selected_mode == MODE_SETTINGS || selected_mode == MODE_SS || selected_mode == MODE_APT) {
-    // map pot val to { ISO, SS, APT } (3x for better error handling)
-    switch (map(pot_val, 0, 1023, 1, 9)) {
+  if (selected_mode == MODE_SETTINGS || selected_mode == MODE_HISTORY || selected_mode == MODE_SS || selected_mode == MODE_APT) {
+    // map pot val to { SET, HIST, SS, APT } (3x for better error handling)
+    switch (map(pot_val, 0, 1023, 1, 12)) {
       case 1:
       case 2:
       case 3:
@@ -161,12 +169,17 @@ void handle_inputs() {
       case 4:
       case 5:
       case 6:
-        // ordering changes based on priority
-        selected_mode = (selected_prio == APT_PRIO) ? MODE_SS : MODE_APT;
+        selected_mode = MODE_HISTORY;
         break;
       case 7:
       case 8:
       case 9:
+        // ordering changes based on priority
+        selected_mode = (selected_prio == APT_PRIO) ? MODE_SS : MODE_APT;
+        break;
+      case 10:
+      case 11:
+      case 12:
         selected_mode = (selected_prio == SS_PRIO) ? MODE_SS : MODE_APT;
         break;
     }
@@ -199,10 +212,6 @@ void calculate_stats() {
     // calculate SS 
     double apt = APT_TABLE[apt_indx];
     double ss = 1 / ((C_TABLE[c_indx] * pow(apt, 2)) / (lux * ISO_TABLE[iso_indx]));
-    Serial.print("Apt: ");
-    Serial.println(apt);
-    Serial.print("calc speed: ");
-    Serial.println(ss);
 
     // search for closest shutter speed
     for (int i = 0; i < ss_tbl_sz - 1; ++i) {
@@ -214,15 +223,10 @@ void calculate_stats() {
         }
       }
     }
-
-    Serial.print("Shutter speed: 1/");
-    Serial.println(SS_TABLE[ss_indx]);
   } else {
     // calculate APT 
     double ss = 1 / SS_TABLE[ss_indx];
     double apt = sqrt(((lux * ISO_TABLE[iso_indx]) / C_TABLE[c_indx]) * ss);
-    Serial.print("Calc apt: ");
-    Serial.println(apt);
 
     // search for closest apt 
     for (int i = 0; i < apt_tbl_sz - 1; ++i) {
@@ -234,9 +238,6 @@ void calculate_stats() {
         }
       }
     }
-
-    Serial.print("apt: ");
-    Serial.println(APT_TABLE[apt_indx]);
   }
 
   // calculate ev detla
@@ -247,7 +248,7 @@ void calculate_stats() {
 }
 
 void display_info() {
-  if (selected_mode == MODE_SETTINGS_EDIT || selected_mode == MODE_APT_EDIT || selected_mode == MODE_SS_EDIT) {
+  if (selected_mode == MODE_SETTINGS_EDIT || selected_mode == MODE_HISTORY_EDIT || selected_mode == MODE_APT_EDIT || selected_mode == MODE_SS_EDIT) {
     display_editing_screen();
     return;
   }
@@ -258,7 +259,8 @@ void display_info() {
 
   selected_mode == MODE_SETTINGS ? display.setTextColor(SSD1306_BLACK, SSD1306_WHITE) : display.setTextColor(SSD1306_WHITE);
   print_left_1x("SETTINGS");
-  selected_mode == -1 ? display.setTextColor(SSD1306_BLACK, SSD1306_WHITE) : display.setTextColor(SSD1306_WHITE);
+
+  selected_mode == MODE_HISTORY ? display.setTextColor(SSD1306_BLACK, SSD1306_WHITE) : display.setTextColor(SSD1306_WHITE);
   print_right_1x("HISTORY");
   display.println();
 
@@ -300,9 +302,13 @@ void display_info() {
 
 // when the user is editing a value
 void display_editing_screen() {
-
   if (selected_mode == MODE_SETTINGS_EDIT) {
     show_settings();
+    return;
+  }
+
+  if (selected_mode == MODE_HISTORY_EDIT) {
+    show_history();
     return;
   }
 

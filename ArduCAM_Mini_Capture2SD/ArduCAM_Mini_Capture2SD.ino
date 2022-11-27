@@ -57,7 +57,8 @@ void myCAMSaveToSDFile() {
 
   while (length--) {
     temp_last = temp;
-    temp =  SPI.transfer(0x00);
+    temp = SPI.transfer(0x00);
+
     //Read JPEG data from FIFO
     if ((temp == 0xD9) && (temp_last == 0xFF)) { //If find the end ,break while,
       Serial.println(F("temp is 0xD9 and temp_last is 0xFF"));
@@ -75,10 +76,9 @@ void myCAMSaveToSDFile() {
     if (is_header == true) { 
       Serial.println(F("is header"));
       //Write image data to buffer if not full
-      if (i < 256)
-      buf[i++] = temp;
-      else
-      {
+      if (i < 256) {
+        buf[i++] = temp;
+      } else {
         //Write 256 bytes image data to file
         myCAM.CS_HIGH();
         outFile.write(buf, 256);
@@ -87,14 +87,12 @@ void myCAMSaveToSDFile() {
         myCAM.CS_LOW();
         myCAM.set_fifo_burst();
       }        
-    }
-    else if ((temp == 0xD8) && (temp_last == 0xFF))
-    {
+    } else if ((temp == 0xD8) && (temp_last == 0xFF)) {
       is_header = true;
       buf[i++] = temp_last;
       buf[i++] = temp;   
-    } 
-  } 
+    }
+  }
 }
 
 void setup() {
@@ -115,16 +113,18 @@ void setup() {
   myCAM.write_reg(0x07, 0x00);
   delay(100);
     
-  while(1){
+  while(1) {
     //Check if the ArduCAM SPI bus is OK
     myCAM.write_reg(ARDUCHIP_TEST1, 0x55);
     temp = myCAM.read_reg(ARDUCHIP_TEST1);
     
     if (temp != 0x55) {
       Serial.println(F("SPI interface Error!"));
-      delay(1000);continue;
+      delay(1000);
+      continue;
     } else {
-      Serial.println(F("SPI interface OK."));break;
+      Serial.println(F("SPI interface OK."));
+      break;
     }
   }
   //Initialize SD Card

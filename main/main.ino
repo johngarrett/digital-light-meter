@@ -43,9 +43,7 @@ priority selected_prio = APT_PRIO;
 
 void setup() {
   Serial.begin(9600);
-//  while (!Serial) {
-//
-//  }
+  //while (!Serial) { }
   Wire.begin();
   if (lightMeter.begin(BH1750::CONTINUOUS_HIGH_RES_MODE, 0x23, &Wire)) {
     Serial.println(F("Began"));

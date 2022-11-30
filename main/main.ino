@@ -11,6 +11,7 @@
 #define OLED_RESET     -1 // Reset pin # (or -1 if sharing Arduino reset pin)
 #define SCREEN_ADDRESS 0x3C /// 0x3D for 128x64, 0x3C for 128x32
 #define SEL_PIN  5
+#define REC_PIN  6
 #define POT_PIN   A5
 
 const double APT_TABLE[]  = {1.0, 1.4, 1.8, 2.0, 2.8, 3.5, 4.0, 4.5, 5.6, 6.3, 8.0, 11.0, 12.7, 16.0, 22.0, 32.0};
@@ -25,7 +26,7 @@ const int ss_tbl_sz = sizeof(SS_TABLE) / sizeof(SS_TABLE[0]);
 const int c_tbl_sz = sizeof(C_TABLE) / sizeof(C_TABLE[0]);
 const int fl_tbl_sz = sizeof(FL_TABLE) / sizeof(FL_TABLE[0]);
 
-enum mode { MODE_SS, MODE_SS_EDIT, MODE_APT, MODE_APT_EDIT, MODE_SETTINGS, MODE_SETTINGS_EDIT, MODE_HISTORY, MODE_HISTORY_EDIT };
+enum mode { MODE_SS, MODE_SS_EDIT, MODE_APT, MODE_APT_EDIT, MODE_SETTINGS, MODE_SETTINGS_EDIT, MODE_HISTORY, MODE_HISTORY_EDIT, MODE_RECORD };
 enum priority { APT_PRIO, SS_PRIO };
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
@@ -35,8 +36,11 @@ BH1750 lightMeter;
 float lux;
 double ev_delta = 0;
 int apt_indx, iso_indx, ss_indx, c_indx, fl_indx = 0;
+int shot_number = 0;
 int sel_state = 0;
+int rec_state = 0;
 int pot_val = 0;
+int recorded_ss_indx, recorded_apt_indx = 0;
 
 mode selected_mode = MODE_SETTINGS;
 priority selected_prio = APT_PRIO;
@@ -59,6 +63,7 @@ void setup() {
   }
 
   pinMode(SEL_PIN, INPUT);
+  pinMode(REC_PIN, INPUT);
 
   // TODO: read default values from sd card!
   double default_apt = 2.8;
@@ -115,6 +120,7 @@ void loop() {
 
 void read_inputs() {
   sel_state = digitalRead(SEL_PIN);
+  rec_state = digitalRead(REC_PIN);
   pot_val = analogRead(POT_PIN);
 }
 
@@ -136,6 +142,18 @@ void handle_inputs() {
   if (selected_mode == MODE_HISTORY_EDIT) {
     handle_history_input();
     return;
+  }
+
+  if (selected_mode == MODE_RECORD) {
+    handle_record_input();
+    return;
+  }
+
+  if (rec_state == 1) {
+    selected_mode = MODE_RECORD;
+    recorded_apt_indx = apt_indx;
+    recorded_ss_indx = ss_indx;
+    delay(175);
   }
 
   // switching between parent and child view
@@ -256,6 +274,11 @@ void calculate_stats() {
 void display_info() {
   if (on_edit_screen()) {
     display_editing_screen();
+    return;
+  }
+
+  if (selected_mode == MODE_RECORD) {
+    show_recording();
     return;
   }
 

@@ -5,6 +5,7 @@
 #include <i2cdetect.h>
 #include <math.h> 
 #include "src/BH1750/src/BH1750.h"
+#include <SD.h>
 
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 32
@@ -13,6 +14,7 @@
 #define SEL_PIN  5
 #define REC_PIN  6
 #define POT_PIN   A5
+#define SD_CS   4
 
 const double APT_TABLE[]  = {1.0, 1.4, 1.8, 2.0, 2.8, 3.5, 4.0, 4.5, 5.6, 6.3, 8.0, 11.0, 12.7, 16.0, 22.0, 32.0};
 const int ISO_TABLE[]     = {6, 12, 25, 50, 100, 160, 200, 400, 800, 1600, 3200, 6400};
@@ -54,13 +56,16 @@ void setup() {
   } else {
     Serial.println(F("Error initing lightmeter"));
   }
-  Serial.println(F("BH1750 Test"));
-  i2cdetect();
 
   if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
     Serial.println(F("SSD1306 allocation failed"));
     for(;;); // Don't proceed, loop forever
   }
+
+  if (!SD.begin(SD_CS)) {
+    Serial.println(F("SD Card failed to initialize!"));
+  }
+
 
   pinMode(SEL_PIN, INPUT);
   pinMode(REC_PIN, INPUT);
@@ -108,6 +113,38 @@ void setup() {
       break;
     }
   }
+}
+
+// create fs if DNE, read values from files if it does
+void initialize_fs() {
+  /*
+
+    /info:
+      ISO ####
+      SHOT ##
+      CVAL_IDX ##
+      F_LEN_IDX ##
+    /last_vals:
+      PRIO #
+      APT_IDX ##
+      SS_IDX ##
+   */
+  File info; 
+
+  if (SD.exists("/info")) {
+    Serial.println(F("/info exists, reading from it"));
+    info = SD.open("/info", FILE_READ);
+    // TODO
+  } else {
+    Serial.println(F("/info DNE, creating it"));
+    info = SD.open("/info", FILE_WRITE);
+    // TODO
+  }
+
+  info.close();
+
+
+
 }
 
 void loop() {

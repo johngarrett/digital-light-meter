@@ -5,7 +5,7 @@
 // #include "memorysaver.h"
 
 #define SD_CS 4
-const int SPI_CS = 12;
+const int SPI_CS = 13;
 
 ArduCAM myCAM( OV2640, SPI_CS );
 
@@ -41,6 +41,11 @@ void myCAMSaveToSDFile() {
     return;
   }
 
+  //Reset the CPLD
+myCAM.write_reg(0x07, 0x80);
+delay(100);
+myCAM.write_reg(0x07, 0x00);
+
   //Construct a file name
   k = k + 1;
   itoa(k, str, 10);
@@ -58,6 +63,7 @@ void myCAMSaveToSDFile() {
   while (length--) {
     temp_last = temp;
     temp = SPI.transfer(0x00);
+    Serial.print(temp, HEX);
 
     //Read JPEG data from FIFO
     if ((temp == 0xD9) && (temp_last == 0xFF)) { //If find the end ,break while,

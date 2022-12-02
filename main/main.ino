@@ -53,7 +53,7 @@ priority selected_prio = APT_PRIO;
 
 void setup() {
   Serial.begin(9600);
-  //while (!Serial) { }
+  while (!Serial) { }
   Wire.begin();
   setup_camera();
 
@@ -76,6 +76,9 @@ void setup() {
 
   pinMode(SEL_PIN, INPUT);
   pinMode(REC_PIN, INPUT);
+
+  // read values from SD card for APT, ISO, SS, etc.
+  read_stored_values();
 
   // TODO: read default values from sd card!
   double default_apt = 2.8;
@@ -167,38 +170,6 @@ void setup_camera() {
   camera.InitCAM();
   camera.OV2640_set_JPEG_size(OV2640_320x240);
   delay(1000);
-}
-
-// create fs if DNE, read values from files if it does
-void initialize_fs() {
-  /*
-
-    /info:
-      ISO ####
-      SHOT ##
-      CVAL_IDX ##
-      F_LEN_IDX ##
-    /last_vals:
-      PRIO #
-      APT_IDX ##
-      SS_IDX ##
-   */
-  File info; 
-
-  if (SD.exists("/info")) {
-    Serial.println(F("/info exists, reading from it"));
-    info = SD.open("/info", FILE_READ);
-    // TODO
-  } else {
-    Serial.println(F("/info DNE, creating it"));
-    info = SD.open("/info", FILE_WRITE);
-    // TODO
-  }
-
-  info.close();
-
-
-
 }
 
 void loop() {

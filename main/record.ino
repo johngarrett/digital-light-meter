@@ -88,7 +88,7 @@ void capture_image() {
     } else if ((temp == 0xD8) && (temp_last == 0xFF)) {
       is_header = true;
       buf[i++] = temp_last;
-      buf[i++] = temp;   
+      buf[i++] = temp;
     }
   }
 }
@@ -133,12 +133,14 @@ void show_recording() {
     print_center_2x(String("f ") + String(APT_TABLE[recorded_apt_indx]) + String((selected_prio == APT_PRIO ? " P" : "")));
     display.println("\n"); // two new lines
 
-    print_center_1x(String("1/") + String(int(SS_TABLE[recorded_ss_indx])) + String((selected_prio == SS_PRIO ? " P" : "")));
+    print_left_1x(String("1/") + String(int(SS_TABLE[recorded_ss_indx])) + String((selected_prio == SS_PRIO ? " P" : "")));
+    print_right_1x(String("#") + String(shot_number));
   } else {
     print_center_2x(String("1/") + String(int(SS_TABLE[recorded_ss_indx])) + String((selected_prio == SS_PRIO ? " P" : "")));
     display.println("\n"); // two new lines
 
-    print_center_1x(String("f ") + String(APT_TABLE[recorded_apt_indx]) + String((selected_prio == APT_PRIO ? " P" : "")));
+    print_left_1x(String("f ") + String(APT_TABLE[recorded_apt_indx]) + String((selected_prio == APT_PRIO ? " P" : "")));
+    print_right_1x(String("#") + String(shot_number));
   }
 
   display.println();

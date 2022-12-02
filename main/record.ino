@@ -1,3 +1,5 @@
+#include <SPI.h> 
+
 enum recording_mode { R_MODE_CANCEL, R_MODE_SAVE };
 recording_mode selected_r_mode = R_MODE_SAVE;
 

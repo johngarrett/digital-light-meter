@@ -7,14 +7,18 @@
 #include "src/BH1750/src/BH1750.h"
 #include <SD.h>
 
+#include <ArduCAM.h>
+#include <SPI.h>
+
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 32
 #define OLED_RESET     -1 // Reset pin # (or -1 if sharing Arduino reset pin)
 #define SCREEN_ADDRESS 0x3C /// 0x3D for 128x64, 0x3C for 128x32
-#define SEL_PIN  5
-#define REC_PIN  6
-#define POT_PIN   A5
+#define SEL_PIN 5
+#define REC_PIN 6
+#define POT_PIN A5
 #define SD_CS   4
+#define SPI_CS  13
 
 const double APT_TABLE[]  = {1.0, 1.4, 1.8, 2.0, 2.8, 3.5, 4.0, 4.5, 5.6, 6.3, 8.0, 11.0, 12.7, 16.0, 22.0, 32.0};
 const int ISO_TABLE[]     = {6, 12, 25, 50, 100, 160, 200, 400, 800, 1600, 3200, 6400};
@@ -32,7 +36,7 @@ enum mode { MODE_SS, MODE_SS_EDIT, MODE_APT, MODE_APT_EDIT, MODE_SETTINGS, MODE_
 enum priority { APT_PRIO, SS_PRIO };
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
-
+ArduCAM camera(OV2640, SPI_CS);
 BH1750 lightMeter;
 
 float lux;
@@ -49,8 +53,10 @@ priority selected_prio = APT_PRIO;
 
 void setup() {
   Serial.begin(9600);
-  //while (!Serial) { }
+  while (!Serial) { }
   Wire.begin();
+  setup_camera();
+
   if (lightMeter.begin(BH1750::CONTINUOUS_HIGH_RES_MODE, 0x23, &Wire)) {
     Serial.println(F("Began"));
   } else {
@@ -65,6 +71,7 @@ void setup() {
   if (!SD.begin(SD_CS)) {
     Serial.println(F("SD Card failed to initialize!"));
   }
+
 
 
   pinMode(SEL_PIN, INPUT);
@@ -113,6 +120,53 @@ void setup() {
       break;
     }
   }
+}
+
+void setup_camera() {
+  uint8_t vid, pid, temp;
+  pinMode(SPI_CS, OUTPUT);
+  digitalWrite(SPI_CS, HIGH);
+  SPI.begin();
+
+  // reset CPLD
+  camera.write_reg(0x07, 0x80);
+  delay(100);
+  camera.write_reg(0x07, 0x00);
+  delay(100);
+
+  while(1) { // TODO: only loop a few times orr don't loop at all
+    //Check if the ArduCAM SPI bus is OK
+    camera.write_reg(ARDUCHIP_TEST1, 0x55);
+    temp = camera.read_reg(ARDUCHIP_TEST1);
+    
+    if (temp != 0x55) {
+      Serial.println(F("SPI interface Error!"));
+      delay(1000);
+      continue;
+    } else {
+      Serial.println(F("SPI interface OK."));
+      break;
+    }
+  }
+
+  while(1) {
+    //Check if the camera module type is OV2640
+    camera.wrSensorReg8_8(0xff, 0x01);
+    camera.rdSensorReg8_8(OV2640_CHIPID_HIGH, &vid);
+    camera.rdSensorReg8_8(OV2640_CHIPID_LOW, &pid);
+    if ((vid != 0x26) && ((pid != 0x41) || (pid != 0x42))) {
+      Serial.println(F("Can't find OV2640 module!"));
+      delay(1000);
+      continue;
+    } else {
+      Serial.println(F("OV2640 detected."));
+      break;
+    }
+  }
+  camera.set_format(JPEG);
+  camera.InitCAM();
+  camera.OV2640_set_JPEG_size(OV2640_320x240);
+  delay(1000);
 }
 
 // create fs if DNE, read values from files if it does

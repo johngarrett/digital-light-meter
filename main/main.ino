@@ -53,7 +53,7 @@ priority selected_prio = APT_PRIO;
 
 void setup() {
   Serial.begin(9600);
-  while (!Serial) { }
+  //while (!Serial) { }
   Wire.begin();
   setup_camera();
 
@@ -244,6 +244,7 @@ void handle_inputs() {
     selected_mode = MODE_RECORD;
     recorded_apt_indx = apt_indx;
     recorded_ss_indx = ss_indx;
+    capture_image();
     delay(175);
   }
 

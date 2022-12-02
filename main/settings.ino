@@ -16,24 +16,28 @@ void handle_settings_input() {
         selected_s_mode = S_MODE_ISO_EDIT;
         break;
       case S_MODE_ISO_EDIT:
+        update_stored_info();
         selected_s_mode = S_MODE_ISO;
         break;
       case S_MODE_FL:
         selected_s_mode = S_MODE_FL_EDIT;
         break;
       case S_MODE_FL_EDIT:
+        update_stored_info();
         selected_s_mode = S_MODE_FL;
         break;
       case S_MODE_CVAL:
         selected_s_mode = S_MODE_CVAL_EDIT;
         break;
       case S_MODE_CVAL_EDIT:
+        update_stored_info();
         selected_s_mode = S_MODE_CVAL;
         break;
       case S_MODE_SN:
         selected_s_mode = S_MODE_SN_EDIT;
         break;
       case S_MODE_SN_EDIT:
+        update_stored_info();
         selected_s_mode = S_MODE_SN;
         break;
       case S_MODE_BACK:

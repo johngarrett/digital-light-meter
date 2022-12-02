@@ -10,14 +10,17 @@ void read_stored_values() {
       SS_IDX ##
    */
 
-  if (SD.exists("/info")) {
-    Serial.println(F("/info exists, reading from it"));
+  if (SD.exists("/info.txt")) {
+    Serial.println(F("/info.txt exists, reading from it"));
     File info; 
-    info = SD.open("/info", FILE_READ);
+    if (!(info = SD.open("/info.txt", FILE_READ))) {
+      Serial.println(F("Unable to open /info.txt!"));
+    }
+
     String data = info.readString();
     Serial.println(data);
 
-    Serial.print("pre scan: ");
+    Serial.println("pre scan: ");
     Serial.println(iso_indx);
     Serial.println(shot_number);
     Serial.println(c_indx);
@@ -26,13 +29,15 @@ void read_stored_values() {
     Serial.println(apt_indx);
     Serial.println(ss_indx);
 
+    int sp;
     sscanf(
         data.c_str(),
-        "ISO_IDX %d\nSHOT %d\nCVAL_IDX %d\nF_LEN_IDX %d\nPRIO %d\nAPT_IDX %d\nSS_IDX %d",
-        iso_indx, shot_number, c_indx, fl_indx, selected_prio, apt_indx, ss_indx
+        "ISO_IDX %d\nSHOT %d\nCVAL_IDX %d\nF_LEN_IDX %d\nPRIO %d\nAPT_IDX %d\nSS_IDX %d\n",
+        &iso_indx, &shot_number, &c_indx, &fl_indx, &sp, &apt_indx, &ss_indx
       );
 
-    Serial.print("post read: ");
+    selected_prio = (sp == 0) ? APT_PRIO : SS_PRIO;
+    Serial.println("post read: ");
     Serial.println(iso_indx);
     Serial.println(shot_number);
     Serial.println(c_indx);
@@ -43,16 +48,20 @@ void read_stored_values() {
 
     info.close();
   } else {
+    Serial.println(F("/info.txt DNE, creating with update_stored_info"));
     update_stored_info();
   }
 }
 
 void update_stored_info() {
     Serial.println(F("[update_stored_info]: called."));
-    File info = SD.open("/info", FILE_WRITE);
+    File info = SD.open("/info.txt", O_TRUNC | FILE_WRITE);
 
-    info.print("ISO ");
-    info.println(ISO_TABLE[iso_indx]);
+    // we want to override the contents
+    info.seek(0);
+
+    info.print("ISO_IDX ");
+    info.println(iso_indx);
 
     info.print("SHOT ");
     info.println(shot_number);
@@ -73,5 +82,6 @@ void update_stored_info() {
     info.println(ss_indx);
 
     info.close();
+    info.flush();
 }
 

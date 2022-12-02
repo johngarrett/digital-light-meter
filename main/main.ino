@@ -79,50 +79,6 @@ void setup() {
 
   // read values from SD card for APT, ISO, SS, etc.
   read_stored_values();
-
-  // TODO: read default values from sd card!
-  double default_apt = 2.8;
-  int default_iso = 200;
-  double default_ss = 100;
-  int default_c = 330;
-  int default_fl = 50;
-
-
-  // set indicies for each value
-  for (int i = 0; i < apt_tbl_sz; ++i) {
-    if (APT_TABLE[i] == default_apt) {
-      apt_indx = i;
-      break;
-    }
-  }
-
-  for (int i = 0; i < iso_tbl_sz; ++i) {
-    if (ISO_TABLE[i] == default_iso) {
-      iso_indx = i;
-      break;
-    }
-  }
-
-  for (int i = 0; i < ss_tbl_sz; ++i) {
-    if (SS_TABLE[i] == default_ss) {
-      ss_indx = i;
-      break;
-    }
-  }
-
-  for (int i = 0; i < c_tbl_sz; ++i) {
-    if (C_TABLE[i] == default_c) {
-      c_indx = i;
-      break;
-    }
-  }
-
-  for (int i = 0; i < fl_tbl_sz; ++i) {
-    if (FL_TABLE[i] == default_fl) {
-      fl_indx = i;
-      break;
-    }
-  }
 }
 
 void setup_camera() {
@@ -226,12 +182,14 @@ void handle_inputs() {
         selected_mode = MODE_APT_EDIT;
         break;
       case MODE_APT_EDIT:
+        update_stored_info();
         selected_mode = MODE_APT;
         break;
       case MODE_SS:
         selected_mode = MODE_SS_EDIT;
         break;
       case MODE_SS_EDIT:
+        update_stored_info();
         selected_mode = MODE_SS;
         break;
       case MODE_SETTINGS:

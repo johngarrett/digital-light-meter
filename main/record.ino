@@ -5,6 +5,7 @@ recording_mode selected_r_mode = R_MODE_SAVE;
 void save_recording() {
   shot_number++;
   // TODO: save shot metadata
+  update_stored_info();
 }
 
 /**

@@ -140,6 +140,11 @@ void show_settings() {
   print_right_1x(String("shot # ") + String(shot_number));
   display.println();
 
+  display.setTextColor(SSD1306_WHITE);
+  print_left_1x(String("bat ") + String(bat_val) + String("v"));
+
+  display.println();
+
 
   display.display();
 }

@@ -34,7 +34,7 @@ const int ss_tbl_sz = sizeof(SS_TABLE) / sizeof(SS_TABLE[0]);
 const int c_tbl_sz = sizeof(C_TABLE) / sizeof(C_TABLE[0]);
 const int fl_tbl_sz = sizeof(FL_TABLE) / sizeof(FL_TABLE[0]);
 
-enum mode { MODE_SS, MODE_SS_EDIT, MODE_APT, MODE_APT_EDIT, MODE_SETTINGS, MODE_SETTINGS_EDIT, MODE_HISTORY, MODE_HISTORY_EDIT, MODE_RECORD };
+enum mode { MODE_BOOTUP, MODE_SS, MODE_SS_EDIT, MODE_APT, MODE_APT_EDIT, MODE_SETTINGS, MODE_SETTINGS_EDIT, MODE_HISTORY, MODE_HISTORY_EDIT, MODE_RECORD };
 enum priority { APT_PRIO, SS_PRIO };
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
@@ -43,7 +43,8 @@ BH1750 lightMeter;
 
 float lux;
 double ev_delta = 0;
-int apt_indx, iso_indx, ss_indx, c_indx, fl_indx = 0;
+int apt_indx, iso_indx, ss_indx, fl_indx = 0;
+int c_indx = 1; // default is 330
 int shot_number = 0;
 int sel_state = 0;
 int rec_state = 0;
@@ -53,7 +54,7 @@ int recorded_ss_indx, recorded_apt_indx = 0;
 bool camera_initialized = false;
 bool sd_available = false;
 
-mode selected_mode = MODE_SETTINGS;
+mode selected_mode = MODE_BOOTUP;
 priority selected_prio = APT_PRIO;
 
 void setup() {
@@ -83,12 +84,18 @@ void setup() {
 
   // read values from SD card for APT, ISO, SS, etc.
   read_stored_values();
-
-  // display_initial_info(); TODO: not working
 }
 
 // display ISO, F-length, and shot number on bootup
-void display_initial_info() {
+int bootup_countdown = 50;
+void display_bootup_screen() {
+  // the default mode is MODE_BOOTUP, keep it that way until bootup_countdown reaches 0
+  bootup_countdown--;
+
+  if (bootup_countdown == 0) {
+    selected_mode = MODE_SETTINGS;
+  }
+
   display.clearDisplay();
   display.setTextSize(1);
   display.setCursor(0,0);
@@ -183,6 +190,7 @@ boolean on_main_screen() {
 boolean on_edit_screen() {
   return selected_mode == MODE_SETTINGS_EDIT || selected_mode == MODE_HISTORY_EDIT || selected_mode == MODE_APT_EDIT || selected_mode == MODE_SS_EDIT;
 }
+
 
 void handle_inputs() {
   // pass control over to the settings file
@@ -338,6 +346,11 @@ void display_info() {
 
   if (selected_mode == MODE_RECORD) {
     show_recording();
+    return;
+  }
+
+  if (selected_mode == MODE_BOOTUP) {
+    display_bootup_screen();
     return;
   }
 

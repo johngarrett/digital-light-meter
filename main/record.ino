@@ -3,8 +3,39 @@ recording_mode selected_r_mode = R_MODE_SAVE;
 
 
 void save_recording() {
+  if (!SD.exists("/shots")) {
+    Serial.println(F("/shots DNE, creating"));
+    if (!SD.mkdir("/shots")) {
+      Serial.println(F("mkdir /shots FAILED"));
+    }
+  }
+
+  String file_name = String("/shots/") + String(shot_number) + String(".txt");
+
+  File file = SD.open(file_name.c_str(), O_WRITE | O_CREAT | O_TRUNC);
+
+  file.print("ISO ");
+  file.println(ISO_TABLE[iso_indx]);
+
+  file.print("CVAL ");
+  file.println(C_TABLE[c_indx]);
+
+  file.print("F_LEN ");
+  file.println(FL_TABLE[fl_indx]);
+
+  file.print("PRIO ");
+  file.println(selected_prio == APT_PRIO ? "APT" : "SS");
+
+  file.print("APT ");
+  file.println(APT_TABLE[apt_indx]);
+
+  file.print("SS ");
+  file.println((String("1/") + String(SS_TABLE[ss_indx])).c_str());
+
+  // TODO: save EV delta
+
+  file.close();
   shot_number++;
-  // TODO: save shot metadata
   update_stored_info();
 }
 
@@ -73,7 +104,6 @@ void capture_image() {
     }
 
     if (is_header == true) { 
-      Serial.println(F("is header"));
       //Write image data to buffer if not full
       if (i < 256) {
         buf[i++] = temp;

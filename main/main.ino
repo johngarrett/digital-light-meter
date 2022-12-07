@@ -53,7 +53,7 @@ priority selected_prio = APT_PRIO;
 
 void setup() {
   Serial.begin(9600);
-  while (!Serial) { }
+  //while (!Serial) { }
   Wire.begin();
   setup_camera();
 

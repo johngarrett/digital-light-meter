@@ -11,21 +11,23 @@
 #include <ArduCAM.h>
 #include <SPI.h>
 
-#define SCREEN_WIDTH 128
-#define SCREEN_HEIGHT 32
-#define OLED_RESET     -1 // Reset pin # (or -1 if sharing Arduino reset pin)
-#define SCREEN_ADDRESS 0x3C /// 0x3D for 128x64, 0x3C for 128x32
-#define SEL_PIN 6
-#define REC_PIN 10
-#define POT_PIN A1
-#define BAT_PIN A7
+#define MAX_BAT_VOLT    4.2  // max voltage for lipo battery
+#define SCREEN_WIDTH    128
+#define SCREEN_HEIGHT   32
+#define OLED_RESET      -1   // Reset pin # (or -1 if sharing Arduino reset pin)
+#define SCREEN_ADDRESS  0x3C // 0x3D for 128x64, 0x3C for 128x32
+
 #define SD_CS   4
 #define SPI_CS  12
+#define SEL_PIN 10
+#define REC_PIN 6
+#define POT_PIN A1
+#define BAT_PIN A7
 
 const double APT_TABLE[]  = {1.0, 1.4, 1.8, 2.0, 2.8, 3.5, 4.0, 4.5, 5.6, 6.3, 8.0, 11.0, 12.7, 16.0, 22.0, 32.0};
 const int ISO_TABLE[]     = {6, 12, 25, 50, 100, 160, 200, 400, 800, 1600, 3200, 6400};
 const double SS_TABLE[]   = {-1, 2, 5, 10, 25, 50, 100, 250, 500, 1000};
-const int C_TABLE[]       = { 250, 330 };
+const int C_TABLE[]       = { 250, 330 }; // incident constant
 const int FL_TABLE[]      = { 28, 50 }; // focal length
 
 const int apt_tbl_sz = sizeof(APT_TABLE) / sizeof(APT_TABLE[0]);
@@ -106,7 +108,19 @@ void display_bootup_screen() {
   print_right_1x(String("F-Len ") + String(FL_TABLE[fl_indx]));
   display.println();
   print_center_2x(String("Shot #") + String(shot_number));
-  display.println();
+  display.println('\n');
+
+  // drawing battery percentage
+
+  display.print(int((bat_val / MAX_BAT_VOLT) * 100));
+  display.print("% ");
+  int x = display.getCursorX();
+  int y = display.getCursorY();
+  int bar_width = (bat_val / MAX_BAT_VOLT) * (display.width() - x);
+
+  for (int yoff = 0; yoff < 6; ++yoff) {
+    display.drawFastHLine(x, y + yoff, bar_width, SSD1306_WHITE);
+  }
 
   display.display();
 }

@@ -4,7 +4,8 @@
 #include <Wire.h>
 #include <i2cdetect.h>
 #include <math.h> 
-#include "src/BH1750/src/BH1750.h"
+#include "libs/BH1750/src/BH1750.h"
+#include "memorysaver.h"
 #include <SD.h>
 
 #include <ArduCAM.h>
@@ -61,7 +62,7 @@ void setup() {
   Wire.begin();
 
   if (lightMeter.begin(BH1750::CONTINUOUS_HIGH_RES_MODE, 0x23, &Wire)) {
-    Serial.println(F("Began"));
+    Serial.println(F("Light meter initialized"));
   } else {
     Serial.println(F("Error initing lightmeter"));
   }
@@ -164,8 +165,6 @@ void loop() {
 }
 
 void read_inputs() {
-  Serial.print("Sel state");
-  Serial.println(sel_state);
   sel_state = digitalRead(SEL_PIN);
   rec_state = digitalRead(REC_PIN);
   pot_val = analogRead(POT_PIN);

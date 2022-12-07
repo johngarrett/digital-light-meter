@@ -17,6 +17,7 @@
 #define SEL_PIN 5
 #define REC_PIN 6
 #define POT_PIN A5
+#define BAT_PIN A7
 #define SD_CS   4
 #define SPI_CS  13
 
@@ -46,6 +47,7 @@ int shot_number = 0;
 int sel_state = 0;
 int rec_state = 0;
 int pot_val = 0;
+float bat_val = 0;
 int recorded_ss_indx, recorded_apt_indx = 0;
 
 mode selected_mode = MODE_SETTINGS;
@@ -140,6 +142,12 @@ void read_inputs() {
   sel_state = digitalRead(SEL_PIN);
   rec_state = digitalRead(REC_PIN);
   pot_val = analogRead(POT_PIN);
+  // battery value calculation 
+  // https://learn.adafruit.com/adafruit-feather-m0-adalogger/power-management
+  bat_val = analogRead(BAT_PIN);
+  bat_val *= 2;
+  bat_val *= 3.3; // reference voltage
+  bat_val /= 1024; // convert to voltage
 }
 
 boolean on_main_screen() {

@@ -21,6 +21,12 @@ void show_history() {
   print_center_1x("BACK");
   display.println();
 
+  if (!sd_available) {
+    print_center_2x("NO SD Card");
+    display.display();
+    return;
+  }
+
   display.setTextColor(SSD1306_WHITE);
   print_center_2x("TODO");
   display.println("\n");

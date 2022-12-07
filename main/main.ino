@@ -50,6 +50,7 @@ int pot_val = 0;
 float bat_val = 0;
 int recorded_ss_indx, recorded_apt_indx = 0;
 bool camera_initialized = false;
+bool sd_available = false;
 
 mode selected_mode = MODE_SETTINGS;
 priority selected_prio = APT_PRIO;
@@ -70,17 +71,36 @@ void setup() {
     for(;;); // Don't proceed, loop forever
   }
 
-  if (!SD.begin(SD_CS)) {
+  sd_available = SD.begin(SD_CS);
+
+  if (!sd_available) {
     Serial.println(F("SD Card failed to initialize!"));
   }
-
-
 
   pinMode(SEL_PIN, INPUT);
   pinMode(REC_PIN, INPUT);
 
   // read values from SD card for APT, ISO, SS, etc.
   read_stored_values();
+
+  // display_initial_info(); TODO: not working
+}
+
+// display ISO, F-length, and shot number on bootup
+void display_initial_info() {
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setCursor(0,0);
+
+  display.setTextColor(SSD1306_WHITE);
+
+  print_left_1x(String("ISO ") + String(ISO_TABLE[iso_indx]));
+  print_right_1x(String("F-Len ") + String(FL_TABLE[fl_indx]));
+  display.println();
+  print_center_2x(String("Shot #") + String(shot_number));
+  display.println();
+
+  display.display();
 }
 
 void setup_camera() {

@@ -1,4 +1,8 @@
 void read_stored_values() {
+  if (!sd_available) {
+    Serial.println("SD not available, can't read stored values");
+    return;
+  }
   /*
     /info:
       ISO_IDX ####
@@ -54,6 +58,11 @@ void read_stored_values() {
 }
 
 void update_stored_info() {
+    if (!sd_available) {
+      Serial.println("SD not available, can't update stored values");
+      return;
+    }
+
     Serial.println(F("[update_stored_info]: called."));
     File info = SD.open("/info.txt", O_TRUNC | FILE_WRITE);
 

@@ -3,6 +3,11 @@ recording_mode selected_r_mode = R_MODE_SAVE;
 
 
 void save_recording() {
+  if (!sd_available) {
+    Serial.println("Unable to save recording, SD not available");
+    return;
+  }
+
   if (!SD.exists("/shots")) {
     Serial.println(F("/shots DNE, creating"));
     if (!SD.mkdir("/shots")) {
@@ -46,6 +51,10 @@ This is called the second record is pressed.
 TODO: return enum of failure modes
 */
 void capture_image() {
+  if (!sd_available) {
+    Serial.println("Unable to capture image, SD not available");
+    return;
+  }
   char file_name[8];
   char buf[256];
   static int i = 0;
@@ -161,23 +170,25 @@ void show_recording() {
 
   display.setTextColor(SSD1306_WHITE);
 
-  if (selected_prio == SS_PRIO) {
-    print_center_2x(String("f ") + String(APT_TABLE[recorded_apt_indx]) + String((selected_prio == APT_PRIO ? " P" : "")));
+  if (!sd_available) {
+    print_center_2x("NO SD Card");
     display.println("\n"); // two new lines
-
-    print_left_1x(String("1/") + String(int(SS_TABLE[recorded_ss_indx])) + String((selected_prio == SS_PRIO ? " P" : "")));
-    print_right_1x(String("#") + String(shot_number));
   } else {
-    print_center_2x(String("1/") + String(int(SS_TABLE[recorded_ss_indx])) + String((selected_prio == SS_PRIO ? " P" : "")));
-    display.println("\n"); // two new lines
+    if (selected_prio == SS_PRIO) {
+      print_center_2x(String("f ") + String(APT_TABLE[recorded_apt_indx]) + String((selected_prio == APT_PRIO ? " P" : "")));
+      display.println("\n"); // two new lines
 
-    print_left_1x(String("f ") + String(APT_TABLE[recorded_apt_indx]) + String((selected_prio == APT_PRIO ? " P" : "")));
-    print_right_1x(String("#") + String(shot_number));
+      print_left_1x(String("1/") + String(int(SS_TABLE[recorded_ss_indx])) + String((selected_prio == SS_PRIO ? " P" : "")));
+      print_right_1x(String("#") + String(shot_number));
+    } else {
+      print_center_2x(String("1/") + String(int(SS_TABLE[recorded_ss_indx])) + String((selected_prio == SS_PRIO ? " P" : "")));
+      display.println("\n"); // two new lines
+
+      print_left_1x(String("f ") + String(APT_TABLE[recorded_apt_indx]) + String((selected_prio == APT_PRIO ? " P" : "")));
+      print_right_1x(String("#") + String(shot_number));
+    }
+    display.println();
   }
-
-  display.println();
-  
-  // TODO: show shot number?
 
   selected_r_mode == R_MODE_CANCEL ? display.setTextColor(SSD1306_BLACK, SSD1306_WHITE) : display.setTextColor(SSD1306_WHITE);
   print_left_1x("Cancel");

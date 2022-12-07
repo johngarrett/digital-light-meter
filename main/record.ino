@@ -29,7 +29,7 @@ void capture_image() {
   camera.start_capture();
   Serial.println(F("start capture"));
   while(!camera.get_bit(ARDUCHIP_TRIG , CAP_DONE_MASK));
-  Serial.println(F("capture Done."));  
+  Serial.println(F("capture Done."));
 
   length = camera.read_fifo_length();
   Serial.print(F("The fifo length is :"));

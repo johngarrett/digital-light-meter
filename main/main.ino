@@ -14,12 +14,12 @@
 #define SCREEN_HEIGHT 32
 #define OLED_RESET     -1 // Reset pin # (or -1 if sharing Arduino reset pin)
 #define SCREEN_ADDRESS 0x3C /// 0x3D for 128x64, 0x3C for 128x32
-#define SEL_PIN 5
-#define REC_PIN 6
-#define POT_PIN A5
+#define SEL_PIN 6
+#define REC_PIN 10
+#define POT_PIN A1
 #define BAT_PIN A7
 #define SD_CS   4
-#define SPI_CS  13
+#define SPI_CS  12
 
 const double APT_TABLE[]  = {1.0, 1.4, 1.8, 2.0, 2.8, 3.5, 4.0, 4.5, 5.6, 6.3, 8.0, 11.0, 12.7, 16.0, 22.0, 32.0};
 const int ISO_TABLE[]     = {6, 12, 25, 50, 100, 160, 200, 400, 800, 1600, 3200, 6400};
@@ -139,6 +139,8 @@ void loop() {
 }
 
 void read_inputs() {
+  Serial.print("Sel state");
+  Serial.println(sel_state);
   sel_state = digitalRead(SEL_PIN);
   rec_state = digitalRead(REC_PIN);
   pot_val = analogRead(POT_PIN);
@@ -257,6 +259,10 @@ void handle_inputs() {
 
 void read_lux() {
   lux = lightMeter.readLightLevel();
+  if (lux == -1) {
+    lightMeter.begin(BH1750::CONTINUOUS_HIGH_RES_MODE, 0x23, &Wire);
+  }
+  //Serial.println(lux);
 }
 
 // calculate necessary SS, APT based on prio and lux

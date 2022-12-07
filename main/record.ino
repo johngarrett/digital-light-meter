@@ -32,7 +32,8 @@ void save_recording() {
   file.print("SS ");
   file.println((String("1/") + String(SS_TABLE[ss_indx])).c_str());
 
-  // TODO: save EV delta
+  file.print("EV_DELTA ");
+  file.println(ev_delta);
 
   file.close();
   shot_number++;

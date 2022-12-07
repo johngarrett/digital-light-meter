@@ -49,6 +49,7 @@ int rec_state = 0;
 int pot_val = 0;
 float bat_val = 0;
 int recorded_ss_indx, recorded_apt_indx = 0;
+bool camera_initialized = false;
 
 mode selected_mode = MODE_SETTINGS;
 priority selected_prio = APT_PRIO;
@@ -57,7 +58,6 @@ void setup() {
   Serial.begin(9600);
   //while (!Serial) { }
   Wire.begin();
-  setup_camera();
 
   if (lightMeter.begin(BH1750::CONTINUOUS_HIGH_RES_MODE, 0x23, &Wire)) {
     Serial.println(F("Began"));
@@ -127,7 +127,7 @@ void setup_camera() {
   camera.set_format(JPEG);
   camera.InitCAM();
   camera.OV2640_set_JPEG_size(OV2640_320x240);
-  delay(1000);
+  camera_initialized = true;
 }
 
 void loop() {
@@ -136,6 +136,11 @@ void loop() {
   read_lux();
   calculate_stats();
   display_info();
+
+  // don't hang the bootup process
+  if (!camera_initialized) {
+    setup_camera();
+  }
 }
 
 void read_inputs() {

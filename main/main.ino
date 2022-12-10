@@ -45,8 +45,7 @@ BH1750 lightMeter;
 
 float lux;
 double ev_delta = 0;
-int apt_indx, iso_indx, ss_indx, fl_indx = 0;
-int c_indx = 1; // default is 330
+int apt_indx, iso_indx, ss_indx, fl_indx, c_indx = 0;
 int shot_number = 0;
 int sel_state = 0;
 int rec_state = 0;
@@ -89,7 +88,7 @@ void setup() {
 }
 
 // display ISO, F-length, and shot number on bootup
-int bootup_countdown = 50;
+int bootup_countdown = 75;
 void display_bootup_screen() {
   // the default mode is MODE_BOOTUP, keep it that way until bootup_countdown reaches 0
   bootup_countdown--;
@@ -308,15 +307,30 @@ void read_lux() {
   if (lux == -1) {
     lightMeter.begin(BH1750::CONTINUOUS_HIGH_RES_MODE, 0x23, &Wire);
   }
-  //Serial.println(lux);
 }
 
 // calculate necessary SS, APT based on prio and lux
 void calculate_stats() {
+  double actual_ev = log2((lux * ISO_TABLE[iso_indx]) / C_TABLE[c_indx]);
+  /*
+    N^2 / t = ES / C
+
+    N = apeture
+    t = shutter speed (in seconds)
+    E = illuminance
+    S = ISO arithmetic speed
+    C = incident-light constant
+   */
   if (selected_prio == APT_PRIO) {
+    /*
+       t = (N^2 * C) / ES
+     */
+
+
     // calculate SS 
     double apt = APT_TABLE[apt_indx];
-    double ss = 1 / ((C_TABLE[c_indx] * pow(apt, 2)) / (lux * ISO_TABLE[iso_indx]));
+    //double ss = 1 / ((C_TABLE[c_indx] * pow(apt, 2)) / (lux * ISO_TABLE[iso_indx]));
+    double ss = (pow(2, actual_ev) / pow(apt, 2));
 
     // search for closest shutter speed
     for (int i = 0; i < ss_tbl_sz - 1; ++i) {
@@ -346,7 +360,6 @@ void calculate_stats() {
   }
 
   // calculate ev detla
-  double actual_ev = log2((lux * ISO_TABLE[iso_indx]) / C_TABLE[c_indx]);
   double calc_ev = log2(pow(APT_TABLE[apt_indx], 2.0) / (1.0 / SS_TABLE[ss_indx]));
 
   ev_delta = actual_ev - calc_ev;

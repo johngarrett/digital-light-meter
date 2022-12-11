@@ -9,9 +9,11 @@ boolean on_edit_settings_screen() {
   return selected_s_mode == S_MODE_ISO_EDIT || selected_s_mode == S_MODE_FL_EDIT || selected_s_mode == S_MODE_CVAL_EDIT || selected_s_mode == S_MODE_SN_EDIT || selected_s_mode == S_MODE_LS_EDIT;
 }
 
-#define MAX_FILES 20 // max number of files
+#define MAX_FILES 60 // max number of files
 bool has_displayed_ls = false;
 int ls_start = 0;  // what file to start printing at
+int num_files = 0;
+String file_names[MAX_FILES];
 
 void handle_settings_input() {
   if (sel_state == 1) {
@@ -128,7 +130,7 @@ void handle_settings_input() {
   }
 
   if (selected_s_mode == S_MODE_LS_EDIT) {
-    ls_start = map(pot_val, 0, 1023, 0, MAX_FILES);
+    ls_start = map(pot_val, 0, 1023, 0, num_files);
   }
 }
 
@@ -161,7 +163,7 @@ void show_settings() {
   display.println();
 
   selected_s_mode == S_MODE_LS ? display.setTextColor(SSD1306_BLACK, SSD1306_WHITE) : display.setTextColor(SSD1306_WHITE);
-  print_left_1x("ls");
+  print_left_1x("ls all");
 
   display.println();
 
@@ -191,18 +193,20 @@ void display_settings_edit() {
 
 // show all files in the system
 void display_ls_edit() {
-  String file_names[MAX_FILES];
 
   if (!has_displayed_ls) {
     // read in files
     int itr = 0;
     File dir = SD.open("/");
     for (File entry = dir.openNextFile(); entry.name()[0] != 0; entry = dir.openNextFile()) {
-      file_names[itr] = String(entry.name()) + String(entry.isDirectory() ? "/" : "");
+      file_names[itr] = build_file_string(entry, false);
+      num_files++;
       itr++;
+      // TODO: recursive search
       if (entry.isDirectory()) {
         for (File entry_child = entry.openNextFile(); entry_child.name()[0] != 0; entry_child = entry.openNextFile()) {
-          file_names[itr] = String(entry_child.name()) + String(entry_child.isDirectory() ? "/" : "");
+          file_names[itr] = build_file_string(entry_child, true);
+          num_files++;
           itr++;
           entry_child.close();
         }
@@ -219,11 +223,26 @@ void display_ls_edit() {
 
   display.setTextColor(SSD1306_WHITE);
 
-  // we can only display 4 files at once
-
-  for (int offset = 0; offset < 4; ++offset) {
+  // we can only display 3 files at a time
+  for (int offset = 0; offset < 3; ++offset) {
     display.println(file_names[ls_start + offset]);
   }
 
+  display.setTextColor(SSD1306_BLACK, SSD1306_WHITE);
+  print_center_1x("BACK");
+
   display.display();
+}
+
+String build_file_string(File entry, boolean child) {
+  String lhs = (child ? String("  ") : String("")) + String(entry.name()) + String(entry.isDirectory() ? "/" : "");
+  String rhs = String(entry.size());
+  String middle = "";
+
+  // 21 chars in total, build out the middle spacing by the diff
+  for (int i = 21 - lhs.length() - rhs.length(); i > 0; --i) {
+    middle += String(" ");
+  }
+
+  return lhs + middle + rhs;
 }

@@ -193,7 +193,6 @@ void display_settings_edit() {
 
 // show all files in the system
 void display_ls_edit() {
-
   if (!has_displayed_ls) {
     // read in files
     int itr = 0;
@@ -234,15 +233,3 @@ void display_ls_edit() {
   display.display();
 }
 
-String build_file_string(File entry, boolean child) {
-  String lhs = (child ? String("  ") : String("")) + String(entry.name()) + String(entry.isDirectory() ? "/" : "");
-  String rhs = String(entry.size());
-  String middle = "";
-
-  // 21 chars in total, build out the middle spacing by the diff
-  for (int i = 21 - lhs.length() - rhs.length(); i > 0; --i) {
-    middle += String(" ");
-  }
-
-  return lhs + middle + rhs;
-}

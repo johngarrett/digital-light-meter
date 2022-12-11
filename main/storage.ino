@@ -94,3 +94,19 @@ void update_stored_info() {
     info.flush();
 }
 
+/**
+returns:
+file_name     file_size
+*/
+String build_file_string(File entry, boolean child) {
+  String lhs = (child ? String("  ") : String("")) + String(entry.name()) + String(entry.isDirectory() ? "/" : "");
+  String rhs = String(entry.size());
+  String middle = "";
+
+  // 21 chars in total, build out the middle spacing by the diff
+  for (int i = 21 - lhs.length() - rhs.length(); i > 0; --i) {
+    middle += String(" ");
+  }
+
+  return lhs + middle + rhs;
+}

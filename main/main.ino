@@ -24,9 +24,9 @@
 #define POT_PIN A1
 #define BAT_PIN A7
 
-const double APT_TABLE[]  = {1.0, 1.4, 1.8, 2.0, 2.8, 3.5, 4.0, 4.5, 5.6, 6.3, 8.0, 11.0, 12.7, 16.0, 22.0, 32.0};
-const int ISO_TABLE[]     = {6, 12, 25, 50, 100, 160, 200, 400, 800, 1600, 3200, 6400};
-const double SS_TABLE[]   = {-1, 2, 5, 10, 25, 50, 100, 250, 500, 1000};
+const double APT_TABLE[]  = { 1.0, 1.4, 1.8, 2.0, 2.8, 3.5, 4.0, 4.5, 5.6, 6.3, 8.0, 11.0, 12.7, 16.0, 22.0, 32.0 };
+const int ISO_TABLE[]     = { 6, 12, 25, 50, 100, 160, 200, 400, 800, 1600, 3200, 6400 };
+const double SS_TABLE[]   = { -1, 1, 2, 4, 8, 15, 30, 60, 125, 250, 500, 1000 };
 const int C_TABLE[]       = { 250, 330 }; // incident constant
 const int FL_TABLE[]      = { 28, 50 }; // focal length
 

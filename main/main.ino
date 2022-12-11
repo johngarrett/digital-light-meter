@@ -44,7 +44,7 @@ ArduCAM camera(OV2640, SPI_CS);
 BH1750 lightMeter;
 
 long lux;
-double ev_delta = 0;
+double actual_ev, calc_ev, ev_delta = 0;
 int apt_indx, iso_indx, ss_indx, fl_indx, c_indx = 0;
 int shot_number = 0;
 int sel_state = 0;
@@ -311,7 +311,7 @@ void read_lux() {
 
 // calculate necessary SS, APT based on prio and lux
 void calculate_stats() {
-  double actual_ev = log2((lux * ISO_TABLE[iso_indx]) / C_TABLE[c_indx]);
+  actual_ev = log2((lux * ISO_TABLE[iso_indx]) / C_TABLE[c_indx]);
   /*
     N^2 / t = ES / C
 
@@ -359,7 +359,7 @@ void calculate_stats() {
   }
 
   // calculate ev detla
-  double calc_ev = log2(pow(APT_TABLE[apt_indx], 2.0) / (1.0 / SS_TABLE[ss_indx]));
+  calc_ev = log2(pow(APT_TABLE[apt_indx], 2.0) / (1.0 / SS_TABLE[ss_indx]));
 
   ev_delta = actual_ev - calc_ev;
 }

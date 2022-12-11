@@ -37,6 +37,15 @@ void save_recording() {
   file.print("SS ");
   file.println((String("1/") + String(SS_TABLE[ss_indx])).c_str());
 
+  file.print("LUX ");
+  file.println(lux);
+
+  file.print("EV_ACTUAL ");
+  file.println(actual_ev);
+
+  file.print("EV_CALC ");
+  file.println(calc_ev);
+
   file.print("EV_DELTA ");
   file.println(ev_delta);
 

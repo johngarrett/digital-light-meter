@@ -43,7 +43,7 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 ArduCAM camera(OV2640, SPI_CS);
 BH1750 lightMeter;
 
-float lux;
+long lux;
 double ev_delta = 0;
 int apt_indx, iso_indx, ss_indx, fl_indx, c_indx = 0;
 int shot_number = 0;
@@ -329,8 +329,7 @@ void calculate_stats() {
 
     // calculate SS 
     double apt = APT_TABLE[apt_indx];
-    //double ss = 1 / ((C_TABLE[c_indx] * pow(apt, 2)) / (lux * ISO_TABLE[iso_indx]));
-    double ss = (pow(2, actual_ev) / pow(apt, 2));
+    double ss = pow(2.0, actual_ev) / pow(apt, 2.0);
 
     // search for closest shutter speed
     for (int i = 0; i < ss_tbl_sz - 1; ++i) {
@@ -344,8 +343,8 @@ void calculate_stats() {
     }
   } else {
     // calculate APT 
-    double ss = 1 / SS_TABLE[ss_indx];
-    double apt = sqrt(((lux * ISO_TABLE[iso_indx]) / C_TABLE[c_indx]) * ss);
+    double ss = SS_TABLE[ss_indx];
+    double apt = sqrt(pow(2.0, actual_ev) / ss);
 
     // search for closest apt 
     for (int i = 0; i < apt_tbl_sz - 1; ++i) {

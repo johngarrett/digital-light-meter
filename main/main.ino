@@ -386,11 +386,18 @@ void display_info() {
   display.setCursor(0,0);
 
   selected_mode == MODE_SETTINGS ? display.setTextColor(SSD1306_BLACK, SSD1306_WHITE) : display.setTextColor(SSD1306_WHITE);
-  print_left_1x("SETTINGS");
-
+  display.print("S");
+  display.setTextColor(SSD1306_WHITE);
+  display.print(" ");
   selected_mode == MODE_HISTORY ? display.setTextColor(SSD1306_BLACK, SSD1306_WHITE) : display.setTextColor(SSD1306_WHITE);
-  print_right_1x("HISTORY");
+  display.print("H");
+
+  display.setTextColor(SSD1306_WHITE);
+  print_right_1x(int(lux) + String("lx ") + int((bat_val / MAX_BAT_VOLT) * 100));
+
+
   display.println();
+  display.drawFastHLine(0, display.getCursorY(), display.width(), SSD1306_WHITE);
 
   if (selected_prio == SS_PRIO) {
     /*

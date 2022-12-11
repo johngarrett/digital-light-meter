@@ -1,13 +1,17 @@
-enum settings_mode { S_MODE_ISO, S_MODE_ISO_EDIT, S_MODE_FL, S_MODE_FL_EDIT, S_MODE_CVAL, S_MODE_CVAL_EDIT, S_MODE_SN, S_MODE_SN_EDIT, S_MODE_BACK };
+enum settings_mode { S_MODE_ISO, S_MODE_ISO_EDIT, S_MODE_FL, S_MODE_FL_EDIT, S_MODE_CVAL, S_MODE_CVAL_EDIT, S_MODE_SN, S_MODE_SN_EDIT, S_MODE_LS, S_MODE_LS_EDIT, S_MODE_BACK };
 settings_mode selected_s_mode = S_MODE_ISO;
 
 boolean on_main_settings_screen() {
-  return selected_s_mode == S_MODE_ISO || selected_s_mode == S_MODE_FL || selected_s_mode == S_MODE_CVAL || selected_s_mode == S_MODE_BACK || selected_s_mode == S_MODE_SN;
+  return selected_s_mode == S_MODE_ISO || selected_s_mode == S_MODE_FL || selected_s_mode == S_MODE_CVAL || selected_s_mode == S_MODE_BACK || selected_s_mode == S_MODE_SN || selected_s_mode == S_MODE_LS;
 }
 
 boolean on_edit_settings_screen() {
-  return selected_s_mode == S_MODE_ISO_EDIT || selected_s_mode == S_MODE_FL_EDIT || selected_s_mode == S_MODE_CVAL_EDIT || selected_s_mode == S_MODE_SN_EDIT;
+  return selected_s_mode == S_MODE_ISO_EDIT || selected_s_mode == S_MODE_FL_EDIT || selected_s_mode == S_MODE_CVAL_EDIT || selected_s_mode == S_MODE_SN_EDIT || selected_s_mode == S_MODE_LS_EDIT;
 }
+
+#define MAX_FILES 20 // max number of files
+bool has_displayed_ls = false;
+int ls_start = 0;  // what file to start printing at
 
 void handle_settings_input() {
   if (sel_state == 1) {
@@ -40,6 +44,13 @@ void handle_settings_input() {
         update_stored_info();
         selected_s_mode = S_MODE_SN;
         break;
+      case S_MODE_LS:
+        selected_s_mode = S_MODE_LS_EDIT;
+        break;
+      case S_MODE_LS_EDIT:
+        selected_s_mode = S_MODE_LS;
+        has_displayed_ls = false;
+        break;
       case S_MODE_BACK:
         selected_s_mode = S_MODE_ISO; // reset
         selected_mode = MODE_SETTINGS;
@@ -50,7 +61,7 @@ void handle_settings_input() {
 
   // navigate main screen
   if (on_main_settings_screen()) {
-    switch (map(pot_val, 0, 1023, 1, 15)) {
+    switch (map(pot_val, 0, 1023, 1, 18)) {
       case 1:
       case 2:
       case 3:
@@ -75,6 +86,11 @@ void handle_settings_input() {
       case 14:
       case 15:
         selected_s_mode = S_MODE_SN;
+        break;
+      case 16:
+      case 17:
+      case 18:
+        selected_s_mode = S_MODE_LS;
         break;
     }
   }
@@ -110,6 +126,10 @@ void handle_settings_input() {
       shot_number--;
     }
   }
+
+  if (selected_s_mode == S_MODE_LS_EDIT) {
+    ls_start = map(pot_val, 0, 1023, 0, MAX_FILES);
+  }
 }
 
 void show_settings() {
@@ -140,8 +160,8 @@ void show_settings() {
   print_right_1x(String("shot # ") + String(shot_number));
   display.println();
 
-  display.setTextColor(SSD1306_WHITE);
-  print_left_1x(String("bat ") + String(bat_val) + String("v"));
+  selected_s_mode == S_MODE_LS ? display.setTextColor(SSD1306_BLACK, SSD1306_WHITE) : display.setTextColor(SSD1306_WHITE);
+  print_left_1x("ls");
 
   display.println();
 
@@ -163,5 +183,47 @@ void display_settings_edit() {
     case S_MODE_SN_EDIT:
       render_edit_screen("Shot Num", String(shot_number));
       break;
+    case S_MODE_LS_EDIT:
+      display_ls_edit();
+      break;
   }
+}
+
+// show all files in the system
+void display_ls_edit() {
+  String file_names[MAX_FILES];
+
+  if (!has_displayed_ls) {
+    // read in files
+    int itr = 0;
+    File dir = SD.open("/");
+    for (File entry = dir.openNextFile(); entry.name()[0] != 0; entry = dir.openNextFile()) {
+      file_names[itr] = String(entry.name()) + String(entry.isDirectory() ? "/" : "");
+      itr++;
+      if (entry.isDirectory()) {
+        for (File entry_child = entry.openNextFile(); entry_child.name()[0] != 0; entry_child = entry.openNextFile()) {
+          file_names[itr] = String(entry_child.name()) + String(entry_child.isDirectory() ? "/" : "");
+          itr++;
+          entry_child.close();
+        }
+      }
+      entry.close();
+    }
+    dir.close();
+    has_displayed_ls = true;
+  }
+
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setCursor(0,0);
+
+  display.setTextColor(SSD1306_WHITE);
+
+  // we can only display 4 files at once
+
+  for (int offset = 0; offset < 4; ++offset) {
+    display.println(file_names[ls_start + offset]);
+  }
+
+  display.display();
 }

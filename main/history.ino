@@ -28,7 +28,18 @@ void show_history() {
   }
 
   display.setTextColor(SSD1306_WHITE);
-  print_center_2x("TODO");
+  while (true) {
+    File dir = SD.open("/SHOTS");
+    File entry = dir.openNextFile();
+    if (!entry) {
+      // no more files
+      dir.close();
+      break;
+    }
+
+    display.print(entry.name());
+    entry.close();
+  }
   display.println("\n");
 
   display.display();

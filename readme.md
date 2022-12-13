@@ -133,8 +133,8 @@ In this phase, every electrical connection was extremely fragile. The device sta
 This was a good way to estimate the dimensions for the final case and assess the overall feel of the device. In this phase, I was also able to calibrate the calculations as I was able to test a wider variety of conditions
 
 3. The final case
-This is the current state of the project and the images can be seen under 
-[build](##Build).
+
+This is the current state of the project and the images can be seen under [build](#Build).
 
 
 ### Things that didn't work

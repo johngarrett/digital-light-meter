@@ -31,8 +31,9 @@ When in use, the user can set a desired shutter speed or aperture and the corres
 They then can hit record and the shot metadata along with a reference photo captured by the OV2640 will be saved to the SD card under the corresponding shot number.
 
 ## Screens
-### Bootup
+### Startup
 ![boot screen](/demo%20images/startup.gif)
+
 On startup, the following values are read from storage and displayed
 - ISO value
 - Lens focal length

@@ -1,3 +1,10 @@
+# Usage
+
+compile
+
+```bash
+arduino-cli compile -b adafruit:samd:adafruit_feather_m0
+```
 # About
 
 This project is a digital light meter used for metering photos. 

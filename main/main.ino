@@ -6,6 +6,7 @@
 #include <math.h> 
 #include "libs/BH1750/src/BH1750.h"
 #include "memorysaver.h"
+#include "include.h"
 #include <SD.h>
 
 #include <ArduCAM.h>
@@ -40,7 +41,9 @@ enum mode { MODE_BOOTUP, MODE_SS, MODE_SS_EDIT, MODE_APT, MODE_APT_EDIT, MODE_SE
 enum priority { APT_PRIO, SS_PRIO };
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+#ifdef CAMERA
 ArduCAM camera(OV2640, SPI_CS);
+#endif
 BH1750 lightMeter;
 
 long lux;

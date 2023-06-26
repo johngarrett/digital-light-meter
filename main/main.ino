@@ -20,7 +20,6 @@
 
 #define SD_CS   4
 #define SPI_CS  12
-#define SEL_PIN 10
 #define REC_PIN 6
 #define POT_PIN A1
 #define BAT_PIN A7
@@ -29,6 +28,8 @@
 #define ROT_CLK 5
 #define ROT_DT  6
 #define ROT_SW  9
+
+#define MAX_ROT_VAL 20
 
 const double APT_TABLE[]  = { 1.0, 1.4, 1.8, 2.0, 2.8, 3.5, 4.0, 4.5, 5.6, 6.3, 8.0, 11.0, 12.7, 16.0, 22.0, 32.0 };
 const int ISO_TABLE[]     = { 6, 12, 25, 50, 100, 160, 200, 400, 800, 1600, 3200, 6400 };
@@ -78,17 +79,21 @@ void setup() {
     for(;;); // Don't proceed, loop forever
   }
 
+  /*
   sd_available = SD.begin(SD_CS);
 
   if (!sd_available) {
     Serial.println(F("SD Card failed to initialize!"));
   }
+  */
 
-  pinMode(SEL_PIN, INPUT);
   pinMode(REC_PIN, INPUT);
+  pinMode(ROT_CLK, INPUT);
+  pinMode(ROT_DT,  INPUT);
+  pinMode(ROT_SW,  INPUT_PULLUP);
 
   // read values from SD card for APT, ISO, SS, etc.
-  read_stored_values();
+  //read_stored_values();
 }
 
 // display ISO, F-length, and shot number on bootup
@@ -136,13 +141,28 @@ void loop() {
   display_info();
 }
 
+int prev_rclk = 0;
 void read_inputs() {
-  sel_state = digitalRead(SEL_PIN);
-  rec_state = digitalRead(REC_PIN);
-  pot_val = analogRead(POT_PIN);
+  sel_state = digitalRead(ROT_SW) == 0 ? 1 : 0;
+  rec_state = 0; //digitalRead(REC_PIN);
+  //Serial.print("sel: ");
+  //Serial.println(sel_state);
+
+  // rotary encoder
+  int curr_rclk = digitalRead(ROT_CLK);
+  
+  if (curr_rclk != prev_rclk && curr_rclk == 1) {
+    // CW vs CCW
+    pot_val = (digitalRead(ROT_DT) == curr_rclk) ? pot_val + 2 : pot_val - 2;
+    // 20 notches on rotary encoder
+    pot_val %= 20;
+    Serial.println(pot_val);
+  }
+  prev_rclk = curr_rclk;
+
   // battery value calculation 
   // https://learn.adafruit.com/adafruit-feather-m0-adalogger/power-management
-  bat_val = analogRead(BAT_PIN);
+  //bat_val = analogRead(BAT_PIN);
   bat_val *= 2;
   bat_val *= 3.3; // reference voltage
   bat_val /= 1024; // convert to voltage
@@ -212,7 +232,7 @@ void handle_inputs() {
   // the user wants to set a value to be automatically decided
   if (on_main_screen()) {
     // map pot val to { SET, HIST, SS, APT } (3x for better error handling)
-    switch (map(pot_val, 0, 1023, 1, 12)) {
+    switch (map(pot_val, 0, MAX_ROT_VAL, 1, 12)) {
       case 1:
       case 2:
       case 3:
@@ -239,7 +259,7 @@ void handle_inputs() {
 
   if (selected_mode == MODE_SS_EDIT) {
     selected_prio = SS_PRIO;
-    ss_indx = map(pot_val, 0, 1023, 0, ss_tbl_sz);
+    ss_indx = map(pot_val, 0, MAX_ROT_VAL, 0, ss_tbl_sz);
     if (ss_indx  == ss_tbl_sz) {
       ss_indx--;
     }
@@ -247,7 +267,7 @@ void handle_inputs() {
 
   if (selected_mode == MODE_APT_EDIT) {
     selected_prio = APT_PRIO;
-    apt_indx = map(pot_val, 0, 1023, 0, apt_tbl_sz);
+    apt_indx = map(pot_val, 0, MAX_ROT_VAL, 0, apt_tbl_sz);
     if (apt_indx == apt_tbl_sz) {
       apt_indx--;
     }

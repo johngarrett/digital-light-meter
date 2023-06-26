@@ -33,11 +33,11 @@ void handle_history_input() {
   }
 
   if (selected_h_mode == H_MODE_SCROLL) {
-    history_file_start = map(pot_val, 0, 1023, 0, num_history_files);
+    history_file_start = map(pot_val, 0, MAX_ROT_VAL, 0, num_history_files);
   }
 
   if (selected_h_mode == H_MODE_VIEW_ENTRY) {
-    history_entry_line_start = map(pot_val, 0, 1023, 0, num_entry_lines);
+    history_entry_line_start = map(pot_val, 0, MAX_ROT_VAL, 0, num_entry_lines);
   }
 }
 

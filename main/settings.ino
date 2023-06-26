@@ -63,7 +63,7 @@ void handle_settings_input() {
 
   // navigate main screen
   if (on_main_settings_screen()) {
-    switch (map(pot_val, 0, 1023, 1, 18)) {
+    switch (map(pot_val, 0, MAX_ROT_VAL, 1, 18)) {
       case 1:
       case 2:
       case 3:
@@ -98,7 +98,7 @@ void handle_settings_input() {
   }
 
   if (selected_s_mode == S_MODE_ISO_EDIT) {
-    iso_indx = map(pot_val, 0, 1023, 0, iso_tbl_sz);
+    iso_indx = map(pot_val, 0, MAX_ROT_VAL, 0, iso_tbl_sz);
     // for some reason, it glitches out at high values; this helps
     if (iso_indx == iso_tbl_sz) {
       iso_indx--;
@@ -106,7 +106,7 @@ void handle_settings_input() {
   }
 
   if (selected_s_mode == S_MODE_FL_EDIT) {
-    fl_indx = map(pot_val, 0, 1023, 0, fl_tbl_sz);
+    fl_indx = map(pot_val, 0, MAX_ROT_VAL, 0, fl_tbl_sz);
     // for some reason, it glitches out at high values; this helps
     if (fl_indx == fl_tbl_sz) {
       fl_indx;
@@ -114,7 +114,7 @@ void handle_settings_input() {
   }
 
   if (selected_s_mode == S_MODE_CVAL_EDIT) {
-    c_indx = map(pot_val, 0, 1023, 0, c_tbl_sz);
+    c_indx = map(pot_val, 0, MAX_ROT_VAL, 0, c_tbl_sz);
     // for some reason, it glitches out at high values; this helps
     if (c_indx == c_tbl_sz) {
       c_indx--;
@@ -122,7 +122,7 @@ void handle_settings_input() {
   }
 
   if (selected_s_mode == S_MODE_SN_EDIT) {
-    shot_number = map(pot_val, 0, 1023, 0, 37);
+    shot_number = map(pot_val, 0, MAX_ROT_VAL, 0, 37);
     // for some reason, it glitches out at high values; this helps
     if (shot_number  == 37) {
       shot_number--;
@@ -130,7 +130,7 @@ void handle_settings_input() {
   }
 
   if (selected_s_mode == S_MODE_LS_EDIT) {
-    ls_start = map(pot_val, 0, 1023, 0, num_files);
+    ls_start = map(pot_val, 0, MAX_ROT_VAL, 0, num_files);
   }
 }
 

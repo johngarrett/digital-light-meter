@@ -96,7 +96,7 @@ void handle_record_input() {
     delay(175);
   }
 
-  switch (map(pot_val, 0, 1023, 1, 6)) {
+  switch (map(pot_val, 0, MAX_ROT_VAL, 1, 6)) {
     case 1:
     case 2:
     case 3:

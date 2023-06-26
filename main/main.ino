@@ -20,7 +20,7 @@
 
 #define SD_CS   4
 #define SPI_CS  12
-#define REC_PIN 6
+//#define REC_PIN 6
 #define POT_PIN A1
 #define BAT_PIN A7
 
@@ -87,7 +87,7 @@ void setup() {
   }
   */
 
-  pinMode(REC_PIN, INPUT);
+  //pinMode(REC_PIN, INPUT);
   pinMode(ROT_CLK, INPUT);
   pinMode(ROT_DT,  INPUT);
   pinMode(ROT_SW,  INPUT_PULLUP);
@@ -153,9 +153,16 @@ void read_inputs() {
   
   if (curr_rclk != prev_rclk && curr_rclk == 1) {
     // CW vs CCW
-    pot_val = (digitalRead(ROT_DT) == curr_rclk) ? pot_val + 2 : pot_val - 2;
+    if (digitalRead(ROT_DT) != curr_rclk) {
+      pot_val--;
+      Serial.println("CCW");
+    } else {
+      pot_val++;
+      Serial.println("CW");
+    }
+    //pot_val = (digitalRead(ROT_DT) == curr_rclk) ? pot_val + 1 : pot_val - 1;
     // 20 notches on rotary encoder
-    pot_val %= 20;
+    //pot_val %= 20;
     Serial.println(pot_val);
   }
   prev_rclk = curr_rclk;
@@ -232,26 +239,20 @@ void handle_inputs() {
   // the user wants to set a value to be automatically decided
   if (on_main_screen()) {
     // map pot val to { SET, HIST, SS, APT } (3x for better error handling)
-    switch (map(pot_val, 0, MAX_ROT_VAL, 1, 12)) {
-      case 1:
-      case 2:
-      case 3:
+    //switch (map(pot_val, 0, MAX_ROT_VAL, 1, 12)) {
+   // Serial.println(pot_val % 4);
+    switch (pot_val % 4) {
+      case 0:
         selected_mode = MODE_SETTINGS;
         break;
-      case 4:
-      case 5:
-      case 6:
+      case 1:
         selected_mode = MODE_HISTORY;
         break;
-      case 7:
-      case 8:
-      case 9:
+      case 2:
         // ordering changes based on priority
         selected_mode = (selected_prio == APT_PRIO) ? MODE_SS : MODE_APT;
         break;
-      case 10:
-      case 11:
-      case 12:
+      case 3:
         selected_mode = (selected_prio == SS_PRIO) ? MODE_SS : MODE_APT;
         break;
     }

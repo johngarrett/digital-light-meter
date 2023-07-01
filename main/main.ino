@@ -25,9 +25,9 @@
 #define BAT_PIN A7
 
 // pins for the rotary encoder
-#define ROT_CLK 5
-#define ROT_DT  6
-#define ROT_SW  9
+#define BTN_SEL  5
+#define BTN_DOWN 6
+#define BTN_UP   9
 
 #define MAX_ROT_VAL 20
 
@@ -88,12 +88,12 @@ void setup() {
   */
 
   //pinMode(REC_PIN, INPUT);
-  pinMode(ROT_CLK, INPUT);
-  pinMode(ROT_DT,  INPUT);
-  pinMode(ROT_SW,  INPUT_PULLUP);
+  pinMode(BTN_SEL, INPUT);
+  pinMode(BTN_DOWN, INPUT);
+  pinMode(BTN_UP, INPUT);
 
   // read values from SD card for APT, ISO, SS, etc.
-  //read_stored_values();
+  read_stored_values();
 }
 
 // display ISO, F-length, and shot number on bootup
@@ -143,29 +143,34 @@ void loop() {
 
 int prev_rclk = 0;
 void read_inputs() {
-  sel_state = digitalRead(ROT_SW) == 0 ? 1 : 0;
-  rec_state = 0; //digitalRead(REC_PIN);
-  //Serial.print("sel: ");
-  //Serial.println(sel_state);
+  sel_state = digitalRead(BTN_SEL);
 
-  // rotary encoder
-  int curr_rclk = digitalRead(ROT_CLK);
-  
-  if (curr_rclk != prev_rclk && curr_rclk == 1) {
-    // CW vs CCW
-    if (digitalRead(ROT_DT) != curr_rclk) {
-      pot_val--;
-      Serial.println("CCW");
-    } else {
-      pot_val++;
-      Serial.println("CW");
+  rec_state = 0;
+  // hold sel to record
+  if (sel_state) {
+    delay(240);
+    if (digitalRead(BTN_SEL)) {
+      rec_state = 1;
     }
-    //pot_val = (digitalRead(ROT_DT) == curr_rclk) ? pot_val + 1 : pot_val - 1;
-    // 20 notches on rotary encoder
-    //pot_val %= 20;
-    Serial.println(pot_val);
   }
-  prev_rclk = curr_rclk;
+
+  int btn_up_read = digitalRead(BTN_UP);
+  int btn_down_read = digitalRead(BTN_DOWN);
+
+  if (btn_up_read) {
+    pot_val++;
+    delay(120);
+  }
+  if (btn_down_read) {
+    pot_val--;
+    if (pot_val < 0) { // TODO: fix
+      pot_val = MAX_ROT_VAL;
+    }
+    delay(120);
+  }
+
+  pot_val %= MAX_ROT_VAL;
+  Serial.println(pot_val);
 
   // battery value calculation 
   // https://learn.adafruit.com/adafruit-feather-m0-adalogger/power-management
